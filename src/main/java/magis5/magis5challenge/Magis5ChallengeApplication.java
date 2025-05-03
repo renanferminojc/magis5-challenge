@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Magis5ChallengeApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(Magis5ChallengeApplication.class, args);
-    }
-
+  public static void main(String[] args) {
+    SpringApplication.run(Magis5ChallengeApplication.class, args);
+  }
 }
