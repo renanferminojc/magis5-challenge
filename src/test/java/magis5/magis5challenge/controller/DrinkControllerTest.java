@@ -1,9 +1,11 @@
 package magis5.magis5challenge.controller;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.mapper.DrinkMapperImpl;
 import magis5.magis5challenge.repository.DrinkRepository;
@@ -14,6 +16,9 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,5 +143,51 @@ class DrinkControllerTest {
                 .contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(MockMvcResultMatchers.status().isCreated())
         .andExpect(MockMvcResultMatchers.content().json(response));
+  }
+
+  @ParameterizedTest
+  @MethodSource("postUserBadRequestSource")
+  @DisplayName("POST /drink returns bad request when fields are invalid")
+  void save_ReturnsBadRequest_WhenFieldsAreInvalid(String fileName, List<String> errors)
+      throws Exception {
+    var request = fileUtils.readResourceFile("drink/%s".formatted(fileName));
+
+    var mvcResult =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.post(URL)
+                    .content(request)
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(MockMvcResultMatchers.status().isBadRequest())
+            .andReturn();
+
+    var resolvedException = mvcResult.getResolvedException();
+    Assertions.assertThat(resolvedException).isNotNull();
+    Assertions.assertThat(resolvedException.getMessage()).contains(errors);
+  }
+
+  private static List<String> invalidVolumeError() {
+    var emailInvalidError = "The field 'volume' must be greater than or equal to 0.1";
+    return List.of(emailInvalidError);
+  }
+
+  private static List<String> allRequiredErrors() {
+    var firstNameRequiredError = "The field 'name' is required";
+    var lastNameRequiredError = "The field 'volume' is required";
+    var emailRequiredError = "The field 'drink_type' is required";
+
+    return new ArrayList<>(
+        List.of(firstNameRequiredError, lastNameRequiredError, emailRequiredError));
+  }
+
+  private static Stream<Arguments> postUserBadRequestSource() {
+    var allRequiredErrors = allRequiredErrors();
+    var emailInvalidError = invalidVolumeError();
+
+    return Stream.of(
+        Arguments.of("post-request-user-empty-fields-400.json", allRequiredErrors),
+        Arguments.of("post-request-user-blank-fields-400.json", allRequiredErrors),
+        Arguments.of("post-request-user-invalid-drink-type-400.json", emailInvalidError));
   }
 }
