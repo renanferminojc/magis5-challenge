@@ -1,0 +1,14 @@
+services:
+  mysql:
+    image: mysql:9.0.1
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: magis5_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - magis5-db:/var/lib/mysql
+
+volumes:
+  magis5-db:
