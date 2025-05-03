@@ -2,12 +2,14 @@ package magis5.magis5challenge.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.mapper.DrinkMapperImpl;
 import magis5.magis5challenge.repository.DrinkRepository;
 import magis5.magis5challenge.service.impl.DrinkServiceImpl;
 import magis5.magis5challenge.utils.DrinkUtils;
 import magis5.magis5challenge.utils.FileUtils;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -64,6 +67,21 @@ class DrinkControllerTest {
                 .contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.content().json(response));
+  }
+
+  @Test
+  @DisplayName("GET /drink/99 - It Should throw not found when drink is not found")
+  void itShouldThrowNotFoundWhenDrinkIsNotFound() throws Exception {
+    var id = UUID.randomUUID();
+    MvcResult mvcResult =
+        mockMvc
+            .perform(MockMvcRequestBuilders.get(URL + "/{id}", id))
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(MockMvcResultMatchers.status().isNotFound())
+            .andReturn();
+
+    String expectedMessage = "Drink not found";
+    Assertions.assertThat(mvcResult.getResolvedException().getMessage()).contains(expectedMessage);
   }
 
   @Test
