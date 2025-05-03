@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import magis5.magis5challenge.domain.Drink;
+import magis5.magis5challenge.exception.NotFoundException;
 import magis5.magis5challenge.mapper.DrinkMapper;
 import magis5.magis5challenge.repository.DrinkRepository;
 import magis5.magis5challenge.request.DrinkPostRequest;
@@ -20,7 +21,10 @@ public class DrinkServiceImpl implements DrinkService {
   private final DrinkMapper drinkMapper;
 
   public DrinkGetResponse findById(String id) {
-    Drink drink = drinkRepository.findById(UUID.fromString(id)).get();
+    Drink drink =
+        drinkRepository
+            .findById(UUID.fromString(id))
+            .orElseThrow(() -> new NotFoundException("Drink not found"));
     return drinkMapper.toDrinkGetResponse(drink);
   }
 
