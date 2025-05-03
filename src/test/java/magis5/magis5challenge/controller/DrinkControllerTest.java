@@ -1,5 +1,6 @@
 package magis5.magis5challenge.controller;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -90,6 +91,23 @@ class DrinkControllerTest {
     var response = fileUtils.readResourceFile("drink/get-response-all-drink-200.json");
 
     BDDMockito.when(drinkRepository.findAll()).thenReturn(drinks);
+
+    mockMvc
+        .perform(MockMvcRequestBuilders.get(URL + "/all"))
+        .andDo(MockMvcResultHandlers.print())
+        .andExpect(
+            MockMvcResultMatchers.content()
+                .contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.content().json(response));
+  }
+
+  @Test
+  @DisplayName("GET /drink/all - It should return empty if has no drink saved")
+  void itShouldReturnEmptyIfHasNoDrinkSaved() throws Exception {
+    var response = fileUtils.readResourceFile("drink/get-response-empty-drink-200.json");
+
+    BDDMockito.when(drinkRepository.findAll()).thenReturn(Collections.emptyList());
 
     mockMvc
         .perform(MockMvcRequestBuilders.get(URL + "/all"))

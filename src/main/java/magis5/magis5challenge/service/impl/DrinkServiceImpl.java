@@ -28,14 +28,14 @@ public class DrinkServiceImpl implements DrinkService {
     return drinkMapper.toDrinkGetResponse(drink);
   }
 
+  public List<DrinkGetResponse> findAll() {
+    List<Drink> drinkList = drinkRepository.findAll();
+    return drinkMapper.toDrinkGetResponse(drinkList);
+  }
+
   public DrinkPostResponse save(DrinkPostRequest request) {
     Drink drink = drinkMapper.toDrink(request);
     Drink drinkSaved = drinkRepository.save(drink);
     return drinkMapper.toDrinkPostResponse(drinkSaved);
-  }
-
-  public List<DrinkGetResponse> findAll() {
-    List<Drink> drinkList = drinkRepository.findAll();
-    return drinkMapper.toDrinkGetResponse(drinkList);
   }
 }
