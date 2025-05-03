@@ -5,8 +5,8 @@ import static org.springframework.http.HttpStatus.*;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.request.DrinkPostRequest;
+import magis5.magis5challenge.response.DrinkGetResponse;
 import magis5.magis5challenge.response.DrinkPostResponse;
 import magis5.magis5challenge.service.DrinkService;
 import org.springframework.http.MediaType;
@@ -27,19 +27,19 @@ public class DrinkController {
   private final DrinkService drinkService;
 
   @GetMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<Drink> findById(@PathVariable String id) {
+  public ResponseEntity<DrinkGetResponse> findById(@PathVariable String id) {
     log.info("Find a drinks - {}", id);
 
-    Drink drink = drinkService.findById(id);
+    DrinkGetResponse drink = drinkService.findById(id);
 
     return ResponseEntity.ok(drink);
   }
 
   @GetMapping(path = "all", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<List<Drink>> findAll() {
+  public ResponseEntity<List<DrinkGetResponse>> findAll() {
     log.info("Find all drinks");
 
-    List<Drink> drinkList = drinkService.findAll();
+    List<DrinkGetResponse> drinkList = drinkService.findAll();
 
     return ResponseEntity.ok(drinkList);
   }
