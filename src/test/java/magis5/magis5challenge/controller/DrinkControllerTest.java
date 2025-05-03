@@ -24,7 +24,13 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @WebMvcTest(controllers = DrinkController.class)
-@Import({DrinkController.class, DrinkServiceImpl.class, DrinkMapperImpl.class, DrinkUtils.class, FileUtils.class})
+@Import({
+  DrinkController.class,
+  DrinkServiceImpl.class,
+  DrinkMapperImpl.class,
+  DrinkUtils.class,
+  FileUtils.class
+})
 class DrinkControllerTest {
   private static final String URL = "/drink";
   private List<Drink> drinks;
