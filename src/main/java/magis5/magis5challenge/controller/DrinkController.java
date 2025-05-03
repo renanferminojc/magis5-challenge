@@ -6,6 +6,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import magis5.magis5challenge.domain.Drink;
+import magis5.magis5challenge.request.DrinkPostRequest;
+import magis5.magis5challenge.response.DrinkPostResponse;
 import magis5.magis5challenge.service.DrinkService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,11 +47,11 @@ public class DrinkController {
   @PostMapping(
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<Drink> save(@RequestBody Drink drink) {
+  public ResponseEntity<DrinkPostResponse> save(@RequestBody DrinkPostRequest request) {
     log.info("Create a drink");
 
-    Drink drinkSaved = drinkService.save(drink);
+    DrinkPostResponse drink = drinkService.save(request);
 
-    return ResponseEntity.status(CREATED).body(drinkSaved);
+    return ResponseEntity.status(CREATED).body(drink);
   }
 }

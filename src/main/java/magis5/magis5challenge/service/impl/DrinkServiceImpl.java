@@ -4,7 +4,10 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import magis5.magis5challenge.domain.Drink;
+import magis5.magis5challenge.mapper.DrinkMapper;
 import magis5.magis5challenge.repository.DrinkRepository;
+import magis5.magis5challenge.request.DrinkPostRequest;
+import magis5.magis5challenge.response.DrinkPostResponse;
 import magis5.magis5challenge.service.DrinkService;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +16,16 @@ import org.springframework.stereotype.Service;
 public class DrinkServiceImpl implements DrinkService {
 
   private final DrinkRepository drinkRepository;
+  private final DrinkMapper drinkMapper;
 
   public Drink findById(String id) {
     return drinkRepository.findById(UUID.fromString(id)).get();
   }
 
-  public Drink save(Drink drink) {
-    return drinkRepository.save(drink);
+  public DrinkPostResponse save(DrinkPostRequest request) {
+    Drink drink = drinkMapper.toDrink(request);
+    Drink drinkSaved = drinkRepository.save(drink);
+    return drinkMapper.toDrinkPostResponse(drinkSaved);
   }
 
   public List<Drink> findAll() {
