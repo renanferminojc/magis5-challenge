@@ -2,6 +2,7 @@ package magis5.magis5challenge.controller;
 
 import static org.springframework.http.HttpStatus.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,7 @@ public class DrinkController {
   @PostMapping(
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<DrinkPostResponse> save(@RequestBody DrinkPostRequest request) {
+  public ResponseEntity<DrinkPostResponse> save(@RequestBody @Valid DrinkPostRequest request) {
     log.info("Create a drink");
 
     DrinkPostResponse drink = drinkService.save(request);
