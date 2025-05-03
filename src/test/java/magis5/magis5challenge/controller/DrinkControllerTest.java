@@ -3,6 +3,7 @@ package magis5.magis5challenge.controller;
 import java.util.List;
 import java.util.Optional;
 import magis5.magis5challenge.domain.Drink;
+import magis5.magis5challenge.mapper.DrinkMapperImpl;
 import magis5.magis5challenge.repository.DrinkRepository;
 import magis5.magis5challenge.service.impl.DrinkServiceImpl;
 import magis5.magis5challenge.utils.DrinkUtils;
@@ -23,7 +24,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @WebMvcTest(controllers = DrinkController.class)
-@Import({DrinkController.class, DrinkServiceImpl.class, DrinkUtils.class, FileUtils.class})
+@Import({DrinkController.class, DrinkServiceImpl.class, DrinkMapperImpl.class, DrinkUtils.class, FileUtils.class})
 class DrinkControllerTest {
   private static final String URL = "/drink";
   private List<Drink> drinks;
@@ -80,6 +81,7 @@ class DrinkControllerTest {
   @DisplayName("POST /drink - It should be able to save a drink")
   void itShouldBeAbleToSaveADrink() throws Exception {
     var request = fileUtils.readResourceFile("drink/post-request-save-drink-201.json");
+    var response = fileUtils.readResourceFile("drink/post-response-save-drink-201.json");
 
     BDDMockito.when(drinkRepository.save(ArgumentMatchers.any())).thenReturn(drinks.getFirst());
 
@@ -93,6 +95,6 @@ class DrinkControllerTest {
             MockMvcResultMatchers.content()
                 .contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(MockMvcResultMatchers.status().isCreated())
-        .andExpect(MockMvcResultMatchers.content().json(request));
+        .andExpect(MockMvcResultMatchers.content().json(response));
   }
 }
