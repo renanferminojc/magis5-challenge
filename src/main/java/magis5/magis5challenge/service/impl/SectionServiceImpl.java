@@ -35,6 +35,14 @@ public class SectionServiceImpl implements SectionService {
     return sectionMapper.toSectionGetResponse(section);
   }
 
+  public SectionDrinkResponse findByIdWithDrinks(final String id) {
+    Section section =
+        sectionRepository
+            .findByIdWithDrinks(UUID.fromString(id))
+            .orElseThrow(() -> new NotFoundException("Section not found"));
+    return sectionMapper.toSectionDrinkResponse(section);
+  }
+
   public List<SectionGetResponse> findAll() {
     List<Section> sectionList = sectionRepository.findAll();
     return sectionMapper.toSectionGetResponse(sectionList);

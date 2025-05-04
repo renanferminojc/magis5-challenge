@@ -15,4 +15,6 @@ public interface SectionService {
 
   SectionDrinkResponse holdDrink(
       final String sectionId, final PostRequestSectionHoldDrink requestBody);
+
+  SectionDrinkResponse findByIdWithDrinks(final String id);
 }

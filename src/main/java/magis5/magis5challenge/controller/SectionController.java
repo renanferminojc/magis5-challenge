@@ -38,6 +38,15 @@ public class SectionController {
     return ResponseEntity.ok(section);
   }
 
+  @GetMapping(path = "{id}/drinks", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<SectionDrinkResponse> findByIdWithDrinks(@PathVariable String id) {
+    log.info("Find a section with drinks - {}", id);
+
+    SectionDrinkResponse section = sectionService.findByIdWithDrinks(id);
+
+    return ResponseEntity.ok(section);
+  }
+
   @GetMapping(path = "all", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<List<SectionGetResponse>> findAll() {
     log.info("Find all sections");
