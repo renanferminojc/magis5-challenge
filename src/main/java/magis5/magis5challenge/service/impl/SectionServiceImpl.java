@@ -13,6 +13,7 @@ import magis5.magis5challenge.mapper.SectionMapper;
 import magis5.magis5challenge.repository.DrinkRepository;
 import magis5.magis5challenge.repository.SectionRepository;
 import magis5.magis5challenge.request.PostRequestSectionHoldDrink;
+import magis5.magis5challenge.response.SectionDrinkResponse;
 import magis5.magis5challenge.response.SectionGetResponse;
 import magis5.magis5challenge.response.SectionPostResponse;
 import magis5.magis5challenge.service.SectionService;
@@ -46,7 +47,8 @@ public class SectionServiceImpl implements SectionService {
     return sectionMapper.toSectionPostResponse(sectionSaved);
   }
 
-  public Section holdDrink(final String sectionId, final PostRequestSectionHoldDrink requestBody) {
+  public SectionDrinkResponse holdDrink(
+      final String sectionId, final PostRequestSectionHoldDrink requestBody) {
     Section section =
         sectionRepository
             .findById(UUID.fromString(sectionId))
@@ -67,6 +69,7 @@ public class SectionServiceImpl implements SectionService {
     section.setDrinkType(drink.getType());
     section.setStock(requestBody.getQty().multiply(drink.getVolume()));
     section.setUpdatedAt(LocalDateTime.now());
-    return sectionRepository.save(section);
+    Section saved = sectionRepository.save(section);
+    return sectionMapper.toSectionDrinkResponse(saved);
   }
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import magis5.magis5challenge.request.PostRequestSectionHoldDrink;
+import magis5.magis5challenge.response.SectionDrinkResponse;
 import magis5.magis5challenge.response.SectionGetResponse;
 import magis5.magis5challenge.response.SectionPostResponse;
 import magis5.magis5challenge.service.SectionService;
@@ -59,7 +60,7 @@ public class SectionController {
       path = "{sectionId}/drink",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> holdDrink(
+  public ResponseEntity<SectionDrinkResponse> holdDrink(
       @PathVariable String sectionId, @RequestBody @Valid PostRequestSectionHoldDrink requestBody) {
     log.info("Hold a drink in a section");
 
