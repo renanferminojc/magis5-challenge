@@ -168,26 +168,26 @@ class DrinkControllerTest {
   }
 
   private static List<String> invalidVolumeError() {
-    var emailInvalidError = "The field 'volume' must be greater than or equal to 0.1";
-    return List.of(emailInvalidError);
+    var volumeInvalidError = "The field 'volume' must be greater than or equal to 0.1";
+    return List.of(volumeInvalidError);
   }
 
   private static List<String> allRequiredErrors() {
-    var firstNameRequiredError = "The field 'name' is required";
-    var lastNameRequiredError = "The field 'volume' is required";
-    var emailRequiredError = "The field 'drink_type' is required";
+    var nameRequiredError = "The field 'name' is required";
+    var volumeRequiredError = "The field 'volume' is required";
+    var drinkRequiredError = "The field 'drink_type' is required";
 
     return new ArrayList<>(
-        List.of(firstNameRequiredError, lastNameRequiredError, emailRequiredError));
+        List.of(nameRequiredError, volumeRequiredError, drinkRequiredError));
   }
 
   private static Stream<Arguments> postUserBadRequestSource() {
     var allRequiredErrors = allRequiredErrors();
-    var emailInvalidError = invalidVolumeError();
+    var volumeInvalidError = invalidVolumeError();
 
     return Stream.of(
-        Arguments.of("post-request-user-empty-fields-400.json", allRequiredErrors),
-        Arguments.of("post-request-user-blank-fields-400.json", allRequiredErrors),
-        Arguments.of("post-request-user-invalid-drink-type-400.json", emailInvalidError));
+        Arguments.of("post-request-drink-empty-fields-400.json", allRequiredErrors),
+        Arguments.of("post-request-drink-blank-fields-400.json", allRequiredErrors),
+        Arguments.of("post-request-drink-invalid-drink-type-400.json", volumeInvalidError));
   }
 }
