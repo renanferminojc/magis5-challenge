@@ -1,11 +1,14 @@
 package magis5.magis5challenge.controller;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import magis5.magis5challenge.domain.Section;
 import magis5.magis5challenge.mapper.SectionMapperImpl;
+import magis5.magis5challenge.repository.DrinkRepository;
 import magis5.magis5challenge.repository.SectionRepository;
 import magis5.magis5challenge.service.impl.SectionServiceImpl;
 import magis5.magis5challenge.utils.FileUtils;
@@ -14,6 +17,9 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +52,8 @@ class SectionControllerTest {
   @Autowired private FileUtils fileUtils;
 
   @MockitoBean private SectionRepository sectionRepository;
+
+  @MockitoBean private DrinkRepository drinkRepository;
 
   @BeforeEach
   void init() {
@@ -134,5 +142,52 @@ class SectionControllerTest {
                 .contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(MockMvcResultMatchers.status().isCreated())
         .andExpect(MockMvcResultMatchers.content().json(response));
+  }
+
+  @ParameterizedTest
+  @MethodSource("putSectionDrinkBadRequestSource")
+  @DisplayName("POST /section/{section_id}/drink returns bad request when fields are invalid")
+  void save_ReturnsBadRequest_WhenFieldsAreInvalid(String fileName, List<String> errors)
+      throws Exception {
+    var request = fileUtils.readResourceFile("section/%s".formatted(fileName));
+    var section = sections.getFirst();
+
+    var mvcResult =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.put(URL + "/{id}/drink", section.getId())
+                    .content(request)
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(MockMvcResultMatchers.status().isBadRequest())
+            .andReturn();
+
+    var resolvedException = mvcResult.getResolvedException();
+    Assertions.assertThat(resolvedException).isNotNull();
+    Assertions.assertThat(resolvedException.getMessage()).contains(errors);
+  }
+
+  private static List<String> invalidTransactionErrors() {
+    var emailInvalidError = "Invalid transaction type. Valid values are: IN, OUT";
+    return List.of(emailInvalidError);
+  }
+
+  private static List<String> allRequiredErrors() {
+    var drinkIdRequiredError = "The field 'drink_id' is required";
+    var qtyRequiredError = "The field 'qty' is required";
+
+    return new ArrayList<>(List.of(drinkIdRequiredError, qtyRequiredError));
+  }
+
+  private static Stream<Arguments> putSectionDrinkBadRequestSource() {
+    var allRequiredErrors = allRequiredErrors();
+    var invalidTransactionErrors = invalidTransactionErrors();
+
+    return Stream.of(
+        Arguments.of("put-request-section-drink-empty-fields-400.json", allRequiredErrors),
+        Arguments.of("put-request-section-drink-blank-fields-400.json", allRequiredErrors),
+        Arguments.of(
+            "put-request-section-drink-wrong-transaction-type-fields-400.json",
+            invalidTransactionErrors));
   }
 }
