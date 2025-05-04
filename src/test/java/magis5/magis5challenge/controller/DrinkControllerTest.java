@@ -146,7 +146,7 @@ class DrinkControllerTest {
   }
 
   @ParameterizedTest
-  @MethodSource("postUserBadRequestSource")
+  @MethodSource("postDrinkBadRequestSource")
   @DisplayName("POST /drink returns bad request when fields are invalid")
   void save_ReturnsBadRequest_WhenFieldsAreInvalid(String fileName, List<String> errors)
       throws Exception {
@@ -181,7 +181,7 @@ class DrinkControllerTest {
         List.of(nameRequiredError, volumeRequiredError, drinkRequiredError));
   }
 
-  private static Stream<Arguments> postUserBadRequestSource() {
+  private static Stream<Arguments> postDrinkBadRequestSource() {
     var allRequiredErrors = allRequiredErrors();
     var volumeInvalidError = invalidVolumeError();
 
