@@ -6,6 +6,7 @@ import magis5.magis5challenge.domain.Section;
 import magis5.magis5challenge.response.DrinkSectionResponse;
 import magis5.magis5challenge.response.SectionDrinkResponse;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
 @Mapper(
@@ -14,6 +15,7 @@ import org.mapstruct.MappingConstants;
 public interface DrinkSectionMapper {
 
   // #AvoidCircularDependencyMapStruct
+  @Mapping(target = "drinkType", source = "drink.type")
   DrinkSectionResponse toDrinkSectionResponse(Drink drink, List<Section> sections);
 
   SectionDrinkResponse toSectionDrinkResponse(Section section, List<Drink> drinks);
