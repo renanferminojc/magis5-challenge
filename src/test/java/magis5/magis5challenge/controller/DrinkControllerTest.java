@@ -8,6 +8,8 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.mapper.DrinkMapperImpl;
+import magis5.magis5challenge.mapper.DrinkSectionMapperImpl;
+import magis5.magis5challenge.mapper.SectionMapperImpl;
 import magis5.magis5challenge.repository.DrinkRepository;
 import magis5.magis5challenge.service.impl.DrinkServiceImpl;
 import magis5.magis5challenge.utils.DrinkUtils;
@@ -37,6 +39,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
   DrinkController.class,
   DrinkServiceImpl.class,
   DrinkMapperImpl.class,
+  DrinkSectionMapperImpl.class,
+  SectionMapperImpl.class,
   DrinkUtils.class,
   FileUtils.class
 })
@@ -67,6 +71,25 @@ class DrinkControllerTest {
 
     mockMvc
         .perform(MockMvcRequestBuilders.get(URL + "/{id}", drinks.getFirst().getId()))
+        .andDo(MockMvcResultHandlers.print())
+        .andExpect(
+            MockMvcResultMatchers.content()
+                .contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.content().json(response));
+  }
+
+  @Test
+  @DisplayName(
+      "GET /drink/b4e14200-1d1a-426d-adcf-408c147c6d49/sections - It should be able to return a drink with sections")
+  void itShouldBeAbleToReturnASectionWithDrinks() throws Exception {
+    var response =
+        fileUtils.readResourceFile("drink/get-response-drink-by-id-with-sections-200.json");
+    BDDMockito.when(drinkRepository.findByIdWithSections(ArgumentMatchers.any()))
+        .thenReturn(Optional.ofNullable(drinkUtils.drinkWithSections()));
+
+    mockMvc
+        .perform(MockMvcRequestBuilders.get(URL + "/{id}/sections", drinks.getFirst().getId()))
         .andDo(MockMvcResultHandlers.print())
         .andExpect(
             MockMvcResultMatchers.content()
