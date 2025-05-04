@@ -2,9 +2,11 @@ package magis5.magis5challenge.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import magis5.magis5challenge.request.PostRequestSectionHoldDrink;
 import magis5.magis5challenge.response.SectionGetResponse;
 import magis5.magis5challenge.response.SectionPostResponse;
 import magis5.magis5challenge.service.SectionService;
@@ -13,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,5 +53,18 @@ public class SectionController {
     SectionPostResponse section = sectionService.save();
 
     return ResponseEntity.status(CREATED).body(section);
+  }
+
+  @PutMapping(
+      path = "{sectionId}/drink",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> holdDrink(
+      @PathVariable String sectionId, @RequestBody @Valid PostRequestSectionHoldDrink requestBody) {
+    log.info("Hold a drink in a section");
+
+    var section = sectionService.holdDrink(sectionId, requestBody);
+
+    return ResponseEntity.ok(section);
   }
 }

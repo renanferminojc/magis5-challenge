@@ -1,14 +1,18 @@
 package magis5.magis5challenge.service.impl;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.domain.Section;
 import magis5.magis5challenge.enumeration.EDrinkType;
 import magis5.magis5challenge.exception.NotFoundException;
 import magis5.magis5challenge.mapper.SectionMapper;
+import magis5.magis5challenge.repository.DrinkRepository;
 import magis5.magis5challenge.repository.SectionRepository;
+import magis5.magis5challenge.request.PostRequestSectionHoldDrink;
 import magis5.magis5challenge.response.SectionGetResponse;
 import magis5.magis5challenge.response.SectionPostResponse;
 import magis5.magis5challenge.service.SectionService;
@@ -19,6 +23,7 @@ import org.springframework.stereotype.Service;
 public class SectionServiceImpl implements SectionService {
 
   private final SectionRepository sectionRepository;
+  private final DrinkRepository drinkRepository;
   private final SectionMapper sectionMapper;
 
   public SectionGetResponse findById(String id) {
@@ -39,5 +44,29 @@ public class SectionServiceImpl implements SectionService {
         Section.builder().stock(BigDecimal.ZERO).drinkType(EDrinkType.NON_ALCOHOLIC).build();
     Section sectionSaved = sectionRepository.save(section);
     return sectionMapper.toSectionPostResponse(sectionSaved);
+  }
+
+  public Section holdDrink(final String sectionId, final PostRequestSectionHoldDrink requestBody) {
+    Section section =
+        sectionRepository
+            .findById(UUID.fromString(sectionId))
+            .orElseThrow(() -> new NotFoundException("Section not found"));
+    Drink drink =
+        drinkRepository
+            .findById(UUID.fromString(requestBody.getDrinkId()))
+            .orElseThrow(() -> new NotFoundException("Drink not found"));
+
+    if (!section.getDrinks().contains(drink)) {
+      section.getDrinks().add(drink);
+    }
+
+    if (!drink.getSections().contains(section)) {
+      drink.getSections().add(section);
+    }
+
+    section.setDrinkType(drink.getType());
+    section.setStock(requestBody.getQty().multiply(drink.getVolume()));
+    section.setUpdatedAt(LocalDateTime.now());
+    return sectionRepository.save(section);
   }
 }
