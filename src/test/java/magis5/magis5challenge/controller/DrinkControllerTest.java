@@ -177,8 +177,7 @@ class DrinkControllerTest {
     var volumeRequiredError = "The field 'volume' is required";
     var drinkRequiredError = "The field 'drink_type' is required";
 
-    return new ArrayList<>(
-        List.of(nameRequiredError, volumeRequiredError, drinkRequiredError));
+    return new ArrayList<>(List.of(nameRequiredError, volumeRequiredError, drinkRequiredError));
   }
 
   private static Stream<Arguments> postDrinkBadRequestSource() {
