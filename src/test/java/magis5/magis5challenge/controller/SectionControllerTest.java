@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 import magis5.magis5challenge.domain.Section;
+import magis5.magis5challenge.mapper.DrinkMapperImpl;
 import magis5.magis5challenge.mapper.SectionMapperImpl;
 import magis5.magis5challenge.repository.DrinkRepository;
 import magis5.magis5challenge.repository.SectionRepository;
@@ -38,6 +39,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
   SectionController.class,
   SectionServiceImpl.class,
   SectionMapperImpl.class,
+  DrinkMapperImpl.class,
   SectionUtils.class,
   FileUtils.class
 })
@@ -61,7 +63,8 @@ class SectionControllerTest {
   }
 
   @Test
-  @DisplayName("GET /section/1 - It should be able to return a section")
+  @DisplayName(
+      "GET /section/b4e14200-1d1a-426d-adcf-408c147c6d49 - It should be able to return a section")
   void itShouldBeAbleToReturnASection() throws Exception {
     var response = fileUtils.readResourceFile("section/get-response-section-by-id-200.json");
     Section section = sections.getFirst();
@@ -79,7 +82,27 @@ class SectionControllerTest {
   }
 
   @Test
-  @DisplayName("GET /section/99 - It Should throw not found when section is not found")
+  @DisplayName(
+      "GET /section/b4e14200-1d1a-426d-adcf-408c147c6d49/drinks - It should be able to return a section with drinks")
+  void itShouldBeAbleToReturnASectionWithDrinks() throws Exception {
+    var response =
+        fileUtils.readResourceFile("section/get-response-section-by-id-with-drinks-200.json");
+    BDDMockito.when(sectionRepository.findByIdWithDrinks(ArgumentMatchers.any()))
+        .thenReturn(Optional.ofNullable(sectionUtils.sectionWithDrinks()));
+
+    mockMvc
+        .perform(MockMvcRequestBuilders.get(URL + "/{id}/drinks", sections.getFirst().getId()))
+        .andDo(MockMvcResultHandlers.print())
+        .andExpect(
+            MockMvcResultMatchers.content()
+                .contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.content().json(response));
+  }
+
+  @Test
+  @DisplayName(
+      "GET /section/b4e14200-1d1a-426d-adcf-99999999999 - It Should throw not found when section is not found")
   void itShouldThrowNotFoundWhenSectionIsNotFound() throws Exception {
     var id = UUID.randomUUID();
     MvcResult mvcResult =
