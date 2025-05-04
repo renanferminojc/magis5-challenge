@@ -6,10 +6,12 @@ import lombok.RequiredArgsConstructor;
 import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.exception.NotFoundException;
 import magis5.magis5challenge.mapper.DrinkMapper;
+import magis5.magis5challenge.mapper.DrinkSectionMapper;
 import magis5.magis5challenge.repository.DrinkRepository;
 import magis5.magis5challenge.request.DrinkPostRequest;
 import magis5.magis5challenge.response.DrinkGetResponse;
 import magis5.magis5challenge.response.DrinkPostResponse;
+import magis5.magis5challenge.response.DrinkSectionResponse;
 import magis5.magis5challenge.service.DrinkService;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ public class DrinkServiceImpl implements DrinkService {
 
   private final DrinkRepository drinkRepository;
   private final DrinkMapper drinkMapper;
+  private final DrinkSectionMapper drinkSectionMapper;
 
   public DrinkGetResponse findById(String id) {
     Drink drink =
@@ -26,6 +29,14 @@ public class DrinkServiceImpl implements DrinkService {
             .findById(UUID.fromString(id))
             .orElseThrow(() -> new NotFoundException("Drink not found"));
     return drinkMapper.toDrinkGetResponse(drink);
+  }
+
+  public DrinkSectionResponse findByIdWithSections(String drinkId) {
+    Drink drink =
+        drinkRepository
+            .findByIdWithSections(UUID.fromString(drinkId))
+            .orElseThrow(() -> new NotFoundException("Drink not found"));
+    return drinkSectionMapper.toDrinkSectionResponse(drink, drink.getSections());
   }
 
   public List<DrinkGetResponse> findAll() {

@@ -9,6 +9,7 @@ import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.domain.Section;
 import magis5.magis5challenge.enumeration.EDrinkType;
 import magis5.magis5challenge.exception.NotFoundException;
+import magis5.magis5challenge.mapper.DrinkSectionMapper;
 import magis5.magis5challenge.mapper.SectionMapper;
 import magis5.magis5challenge.repository.DrinkRepository;
 import magis5.magis5challenge.repository.SectionRepository;
@@ -26,6 +27,7 @@ public class SectionServiceImpl implements SectionService {
   private final SectionRepository sectionRepository;
   private final DrinkRepository drinkRepository;
   private final SectionMapper sectionMapper;
+  private final DrinkSectionMapper drinkSectionMapper;
 
   public SectionGetResponse findById(String id) {
     Section section =
@@ -40,7 +42,7 @@ public class SectionServiceImpl implements SectionService {
         sectionRepository
             .findByIdWithDrinks(UUID.fromString(id))
             .orElseThrow(() -> new NotFoundException("Section not found"));
-    return sectionMapper.toSectionDrinkResponse(section);
+    return drinkSectionMapper.toSectionDrinkResponse(section, section.getDrinks());
   }
 
   public List<SectionGetResponse> findAll() {
@@ -78,6 +80,6 @@ public class SectionServiceImpl implements SectionService {
     section.setStock(requestBody.getQty().multiply(drink.getVolume()));
     section.setUpdatedAt(LocalDateTime.now());
     Section saved = sectionRepository.save(section);
-    return sectionMapper.toSectionDrinkResponse(saved);
+    return drinkSectionMapper.toSectionDrinkResponse(saved, saved.getDrinks());
   }
 }
