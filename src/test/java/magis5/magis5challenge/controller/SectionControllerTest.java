@@ -11,6 +11,7 @@ import magis5.magis5challenge.mapper.DrinkMapperImpl;
 import magis5.magis5challenge.mapper.DrinkSectionMapperImpl;
 import magis5.magis5challenge.mapper.SectionMapperImpl;
 import magis5.magis5challenge.repository.DrinkRepository;
+import magis5.magis5challenge.repository.HistoryRepository;
 import magis5.magis5challenge.repository.SectionRepository;
 import magis5.magis5challenge.service.impl.SectionServiceImpl;
 import magis5.magis5challenge.utils.FileUtils;
@@ -58,6 +59,8 @@ class SectionControllerTest {
   @MockitoBean private SectionRepository sectionRepository;
 
   @MockitoBean private DrinkRepository drinkRepository;
+
+  @MockitoBean private HistoryRepository historyRepository;
 
   @BeforeEach
   void init() {
