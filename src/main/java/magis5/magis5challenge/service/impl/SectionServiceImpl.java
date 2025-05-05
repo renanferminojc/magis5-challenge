@@ -1,5 +1,6 @@
 package magis5.magis5challenge.service.impl;
 
+import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,6 +11,8 @@ import magis5.magis5challenge.domain.History;
 import magis5.magis5challenge.domain.Section;
 import magis5.magis5challenge.enumeration.EDrinkType;
 import magis5.magis5challenge.enumeration.ETransaction;
+import magis5.magis5challenge.exception.CapacityExceededException;
+import magis5.magis5challenge.exception.DrinkTypeException;
 import magis5.magis5challenge.exception.NotFoundException;
 import magis5.magis5challenge.mapper.DrinkSectionMapper;
 import magis5.magis5challenge.mapper.SectionMapper;
@@ -61,6 +64,7 @@ public class SectionServiceImpl implements SectionService {
     return sectionMapper.toSectionPostResponse(sectionSaved);
   }
 
+  @Transactional
   public SectionDrinkResponse holdDrink(
       final String sectionId, final PostRequestSectionHoldDrink requestBody) {
     Section section =
@@ -72,6 +76,16 @@ public class SectionServiceImpl implements SectionService {
             .findById(UUID.fromString(requestBody.getDrinkId()))
             .orElseThrow(() -> new NotFoundException("Drink not found"));
 
+    if (section.getDrinkType() != drink.getType()) {
+      throw new DrinkTypeException(
+          "Section drink type mismatch, section type: %s".formatted(section.getDrinkType()));
+    }
+
+    BigDecimal volumeToBeStored = drink.getVolumeToBeStored(requestBody.getQty());
+    if (canNotStoreADrink(section, volumeToBeStored)) {
+      throw new CapacityExceededException("Capacity exceeded");
+    }
+
     if (!section.getDrinks().contains(drink)) {
       section.getDrinks().add(drink);
     }
@@ -81,16 +95,33 @@ public class SectionServiceImpl implements SectionService {
     }
 
     section.setDrinkType(drink.getType());
-    section.setStock(section.getStock().add(drink.getVolume().multiply(requestBody.getQty())));
+    section.setStock(section.getStock().add(volumeToBeStored));
 
     section.setUpdatedAt(LocalDateTime.now());
     Section saved = sectionRepository.save(section);
 
-    History history =
-        History.builder().section(saved).drink(drink).transaction(ETransaction.IN).build();
-
-    historyRepository.save(history);
+    saveHistory(ETransaction.IN, saved, drink);
 
     return drinkSectionMapper.toSectionDrinkResponse(saved, saved.getDrinks());
+  }
+
+  private void saveHistory(
+      final ETransaction transactionType, final Section section, final Drink drink) {
+    History history =
+        History.builder().section(section).drink(drink).transaction(transactionType).build();
+
+    historyRepository.save(history);
+  }
+
+  private boolean canNotStoreADrink(final Section section, final BigDecimal volumeToBeStored) {
+    final var NON_ALCOHOLIC_MAX_VOLUME = new BigDecimal(400);
+    if (EDrinkType.NON_ALCOHOLIC.equals(section.getDrinkType())) {
+      if (volumeToBeStored.compareTo(NON_ALCOHOLIC_MAX_VOLUME) >= 1
+          || volumeToBeStored.compareTo(section.getStock()) >= 1) {
+        return Boolean.TRUE;
+      }
+    }
+
+    return Boolean.FALSE;
   }
 }

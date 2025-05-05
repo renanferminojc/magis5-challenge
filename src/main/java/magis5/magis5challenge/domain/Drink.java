@@ -54,4 +54,8 @@ public class Drink {
   @JsonBackReference
   @ManyToMany(mappedBy = "drinks", fetch = FetchType.LAZY)
   List<Section> sections;
+
+  public BigDecimal getVolumeToBeStored(final BigDecimal qty) {
+    return volume.multiply(qty);
+  }
 }
