@@ -13,7 +13,7 @@ public interface SectionService {
 
   SectionPostResponse save();
 
-  SectionDrinkResponse holdDrink(
+  SectionDrinkResponse manageSection(
       final String sectionId, final PostRequestSectionHoldDrink requestBody);
 
   SectionDrinkResponse findByIdWithDrinks(final String id);

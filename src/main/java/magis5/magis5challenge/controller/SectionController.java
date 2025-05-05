@@ -69,11 +69,11 @@ public class SectionController {
       path = "{sectionId}/drink",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SectionDrinkResponse> holdDrink(
+  public ResponseEntity<SectionDrinkResponse> manageSection(
       @PathVariable String sectionId, @RequestBody @Valid PostRequestSectionHoldDrink requestBody) {
     log.info("Hold a drink in a section");
 
-    var section = sectionService.holdDrink(sectionId, requestBody);
+    var section = sectionService.manageSection(sectionId, requestBody);
 
     return ResponseEntity.ok(section);
   }

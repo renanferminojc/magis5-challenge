@@ -13,6 +13,7 @@ import magis5.magis5challenge.enumeration.ETransaction;
 import magis5.magis5challenge.exception.CapacityExceededException;
 import magis5.magis5challenge.exception.DrinkTypeException;
 import magis5.magis5challenge.exception.NotFoundException;
+import magis5.magis5challenge.exception.WithDrawException;
 import magis5.magis5challenge.mapper.DrinkSectionMapper;
 import magis5.magis5challenge.mapper.SectionMapper;
 import magis5.magis5challenge.repository.SectionRepository;
@@ -61,21 +62,37 @@ public class SectionServiceImpl implements SectionService {
   }
 
   @Transactional
-  public SectionDrinkResponse holdDrink(
+  public SectionDrinkResponse manageSection(
       final String sectionId, final PostRequestSectionHoldDrink requestBody) {
     Section section = getSection(sectionId);
     Drink drink = drinkService.findEntityById(requestBody.getDrinkId());
+    ETransaction transaction = ETransaction.valueOf(requestBody.getTransactionType());
 
     if (section.getDrinkType() != drink.getType()) {
       throw new DrinkTypeException(
           "Section drink type mismatch, section type: %s".formatted(section.getDrinkType()));
     }
 
-    BigDecimal volumeToBeStored = drink.getVolumeToBeStored(requestBody.getQty());
-    if (exceedsCapacity(section, volumeToBeStored)) {
+    BigDecimal drinkVolume = drink.getVolumeToBeStored(requestBody.getQty());
+    if (exceedsCapacity(section, drinkVolume)) {
       throw new CapacityExceededException("Capacity exceeded");
     }
 
+    if (ETransaction.IN.equals(transaction)) {
+      storeADrink(section, drinkVolume, drink);
+    } else {
+      withDrawADrink(section, drinkVolume, drink);
+    }
+
+    section.setUpdatedAt(LocalDateTime.now());
+    Section saved = sectionRepository.save(section);
+
+    historyService.save(saved, drink, transaction, drinkVolume);
+
+    return drinkSectionMapper.toSectionDrinkResponse(saved, saved.getDrinks());
+  }
+
+  private void storeADrink(Section section, BigDecimal drinkVolume, Drink drink) {
     if (!section.getDrinks().contains(drink)) {
       section.getDrinks().add(drink);
     }
@@ -85,14 +102,16 @@ public class SectionServiceImpl implements SectionService {
     }
 
     section.setDrinkType(drink.getType());
-    section.setStock(section.getStock().add(volumeToBeStored));
+    section.setStock(section.getStock().add(drinkVolume));
+  }
 
-    section.setUpdatedAt(LocalDateTime.now());
-    Section saved = sectionRepository.save(section);
+  private void withDrawADrink(Section section, BigDecimal drinkVolume, Drink drink) {
+    if (!section.getDrinks().contains(drink)) {
+      throw new WithDrawException("Drink not found in this section");
+    }
 
-    historyService.save(saved, drink, ETransaction.IN, volumeToBeStored);
-
-    return drinkSectionMapper.toSectionDrinkResponse(saved, saved.getDrinks());
+    section.setDrinkType(drink.getType());
+    section.setStock(section.getStock().subtract(drinkVolume));
   }
 
   private Section getSection(String sectionId) {
@@ -101,9 +120,8 @@ public class SectionServiceImpl implements SectionService {
         .orElseThrow(() -> new NotFoundException("Section not found"));
   }
 
-  private boolean exceedsCapacity(final Section section, final BigDecimal volumeToBeStored) {
+  private boolean exceedsCapacity(final Section section, final BigDecimal drinkVolume) {
     BigDecimal max = section.getDrinkType().getMaxVolume();
-    return volumeToBeStored.compareTo(max) > 0
-        || volumeToBeStored.compareTo(section.getStock()) > 0;
+    return drinkVolume.compareTo(max) > 0 || drinkVolume.compareTo(section.getStock()) > 0;
   }
 }
