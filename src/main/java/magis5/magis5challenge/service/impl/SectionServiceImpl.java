@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import magis5.magis5challenge.domain.Drink;
-import magis5.magis5challenge.domain.History;
 import magis5.magis5challenge.domain.Section;
 import magis5.magis5challenge.enumeration.EDrinkType;
 import magis5.magis5challenge.enumeration.ETransaction;
@@ -16,13 +15,13 @@ import magis5.magis5challenge.exception.DrinkTypeException;
 import magis5.magis5challenge.exception.NotFoundException;
 import magis5.magis5challenge.mapper.DrinkSectionMapper;
 import magis5.magis5challenge.mapper.SectionMapper;
-import magis5.magis5challenge.repository.DrinkRepository;
-import magis5.magis5challenge.repository.HistoryRepository;
 import magis5.magis5challenge.repository.SectionRepository;
 import magis5.magis5challenge.request.PostRequestSectionHoldDrink;
 import magis5.magis5challenge.response.SectionDrinkResponse;
 import magis5.magis5challenge.response.SectionGetResponse;
 import magis5.magis5challenge.response.SectionPostResponse;
+import magis5.magis5challenge.service.DrinkService;
+import magis5.magis5challenge.service.HistoryService;
 import magis5.magis5challenge.service.SectionService;
 import org.springframework.stereotype.Service;
 
@@ -31,16 +30,13 @@ import org.springframework.stereotype.Service;
 public class SectionServiceImpl implements SectionService {
 
   private final SectionRepository sectionRepository;
-  private final DrinkRepository drinkRepository;
-  private final HistoryRepository historyRepository;
+  private final DrinkService drinkService;
+  private final HistoryService historyService;
   private final SectionMapper sectionMapper;
   private final DrinkSectionMapper drinkSectionMapper;
 
   public SectionGetResponse findById(String id) {
-    Section section =
-        sectionRepository
-            .findById(UUID.fromString(id))
-            .orElseThrow(() -> new NotFoundException("Section not found"));
+    Section section = getSection(id);
     return sectionMapper.toSectionGetResponse(section);
   }
 
@@ -67,14 +63,8 @@ public class SectionServiceImpl implements SectionService {
   @Transactional
   public SectionDrinkResponse holdDrink(
       final String sectionId, final PostRequestSectionHoldDrink requestBody) {
-    Section section =
-        sectionRepository
-            .findById(UUID.fromString(sectionId))
-            .orElseThrow(() -> new NotFoundException("Section not found"));
-    Drink drink =
-        drinkRepository
-            .findById(UUID.fromString(requestBody.getDrinkId()))
-            .orElseThrow(() -> new NotFoundException("Drink not found"));
+    Section section = getSection(sectionId);
+    Drink drink = drinkService.findEntityById(requestBody.getDrinkId());
 
     if (section.getDrinkType() != drink.getType()) {
       throw new DrinkTypeException(
@@ -82,7 +72,7 @@ public class SectionServiceImpl implements SectionService {
     }
 
     BigDecimal volumeToBeStored = drink.getVolumeToBeStored(requestBody.getQty());
-    if (canNotStoreADrink(section, volumeToBeStored)) {
+    if (exceedsCapacity(section, volumeToBeStored)) {
       throw new CapacityExceededException("Capacity exceeded");
     }
 
@@ -100,28 +90,20 @@ public class SectionServiceImpl implements SectionService {
     section.setUpdatedAt(LocalDateTime.now());
     Section saved = sectionRepository.save(section);
 
-    saveHistory(ETransaction.IN, saved, drink);
+    historyService.save(saved, drink, ETransaction.IN, volumeToBeStored);
 
     return drinkSectionMapper.toSectionDrinkResponse(saved, saved.getDrinks());
   }
 
-  private void saveHistory(
-      final ETransaction transactionType, final Section section, final Drink drink) {
-    History history =
-        History.builder().section(section).drink(drink).transaction(transactionType).build();
-
-    historyRepository.save(history);
+  private Section getSection(String sectionId) {
+    return sectionRepository
+        .findById(UUID.fromString(sectionId))
+        .orElseThrow(() -> new NotFoundException("Section not found"));
   }
 
-  private boolean canNotStoreADrink(final Section section, final BigDecimal volumeToBeStored) {
-    final var NON_ALCOHOLIC_MAX_VOLUME = new BigDecimal(400);
-    if (EDrinkType.NON_ALCOHOLIC.equals(section.getDrinkType())) {
-      if (volumeToBeStored.compareTo(NON_ALCOHOLIC_MAX_VOLUME) >= 1
-          || volumeToBeStored.compareTo(section.getStock()) >= 1) {
-        return Boolean.TRUE;
-      }
-    }
-
-    return Boolean.FALSE;
+  private boolean exceedsCapacity(final Section section, final BigDecimal volumeToBeStored) {
+    BigDecimal max = section.getDrinkType().getMaxVolume();
+    return volumeToBeStored.compareTo(max) > 0
+        || volumeToBeStored.compareTo(section.getStock()) > 0;
   }
 }

@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -30,6 +31,8 @@ public class History {
   @Setter(AccessLevel.NONE)
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
+
+  private BigDecimal volume;
 
   @ManyToOne(optional = false, cascade = CascadeType.DETACH)
   private Drink drink;

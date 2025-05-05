@@ -2,6 +2,7 @@ package magis5.magis5challenge.service.impl;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.exception.NotFoundException;
@@ -24,11 +25,11 @@ public class DrinkServiceImpl implements DrinkService {
   private final DrinkSectionMapper drinkSectionMapper;
 
   public DrinkGetResponse findById(String id) {
-    Drink drink =
-        drinkRepository
-            .findById(UUID.fromString(id))
-            .orElseThrow(() -> new NotFoundException("Drink not found"));
-    return drinkMapper.toDrinkGetResponse(drink);
+    return findAndMap(UUID.fromString(id), drinkMapper::toDrinkGetResponse);
+  }
+
+  public Drink findEntityById(String id) {
+    return findAndMap(UUID.fromString(id), Function.identity());
   }
 
   public DrinkSectionResponse findByIdWithSections(String drinkId) {
@@ -48,5 +49,12 @@ public class DrinkServiceImpl implements DrinkService {
     Drink drink = drinkMapper.toDrink(request);
     Drink drinkSaved = drinkRepository.save(drink);
     return drinkMapper.toDrinkPostResponse(drinkSaved);
+  }
+
+  private <R> R findAndMap(UUID id, Function<Drink, R> mapper) {
+    return drinkRepository
+        .findById(id)
+        .map(mapper)
+        .orElseThrow(() -> new NotFoundException("Drink not found"));
   }
 }
