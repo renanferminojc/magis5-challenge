@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import magis5.magis5challenge.domain.Drink;
+import magis5.magis5challenge.domain.History;
 import magis5.magis5challenge.domain.Section;
 import magis5.magis5challenge.enumeration.EDrinkType;
+import magis5.magis5challenge.enumeration.ETransaction;
 import magis5.magis5challenge.exception.NotFoundException;
 import magis5.magis5challenge.mapper.DrinkSectionMapper;
 import magis5.magis5challenge.mapper.SectionMapper;
 import magis5.magis5challenge.repository.DrinkRepository;
+import magis5.magis5challenge.repository.HistoryRepository;
 import magis5.magis5challenge.repository.SectionRepository;
 import magis5.magis5challenge.request.PostRequestSectionHoldDrink;
 import magis5.magis5challenge.response.SectionDrinkResponse;
@@ -26,6 +29,7 @@ public class SectionServiceImpl implements SectionService {
 
   private final SectionRepository sectionRepository;
   private final DrinkRepository drinkRepository;
+  private final HistoryRepository historyRepository;
   private final SectionMapper sectionMapper;
   private final DrinkSectionMapper drinkSectionMapper;
 
@@ -77,9 +81,16 @@ public class SectionServiceImpl implements SectionService {
     }
 
     section.setDrinkType(drink.getType());
-    section.setStock(requestBody.getQty().multiply(drink.getVolume()));
+    section.setStock(section.getStock().add(drink.getVolume().multiply(requestBody.getQty())));
+
     section.setUpdatedAt(LocalDateTime.now());
     Section saved = sectionRepository.save(section);
+
+    History history =
+        History.builder().section(saved).drink(drink).transaction(ETransaction.IN).build();
+
+    historyRepository.save(history);
+
     return drinkSectionMapper.toSectionDrinkResponse(saved, saved.getDrinks());
   }
 }
