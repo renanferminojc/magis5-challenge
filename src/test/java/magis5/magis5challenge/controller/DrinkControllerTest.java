@@ -85,7 +85,7 @@ class DrinkControllerTest {
   void itShouldBeAbleToReturnASectionWithDrinks() throws Exception {
     var response =
         fileUtils.readResourceFile("drink/get-response-drink-by-id-with-sections-200.json");
-    BDDMockito.when(drinkRepository.findByIdWithSections(ArgumentMatchers.any()))
+    BDDMockito.when(drinkRepository.findWithStocksAndSectionsById(ArgumentMatchers.any()))
         .thenReturn(Optional.ofNullable(drinkUtils.drinkWithSections()));
 
     mockMvc

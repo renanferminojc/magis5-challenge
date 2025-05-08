@@ -7,9 +7,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import magis5.magis5challenge.request.PostRequestSectionHoldDrink;
-import magis5.magis5challenge.response.SectionDrinkResponse;
 import magis5.magis5challenge.response.SectionGetResponse;
 import magis5.magis5challenge.response.SectionPostResponse;
+import magis5.magis5challenge.response.SectionWithDrinksResponse;
 import magis5.magis5challenge.service.SectionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,10 +39,10 @@ public class SectionController {
   }
 
   @GetMapping(path = "{id}/drinks", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SectionDrinkResponse> findByIdWithDrinks(@PathVariable String id) {
+  public ResponseEntity<SectionWithDrinksResponse> findByIdWithDrinks(@PathVariable String id) {
     log.info("Find a section with drinks - {}", id);
 
-    SectionDrinkResponse section = sectionService.findByIdWithDrinks(id);
+    SectionWithDrinksResponse section = sectionService.findByIdWithDrinks(id);
 
     return ResponseEntity.ok(section);
   }
@@ -69,7 +69,7 @@ public class SectionController {
       path = "{sectionId}/drink",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<SectionDrinkResponse> manageSection(
+  public ResponseEntity<SectionWithDrinksResponse> manageSection(
       @PathVariable String sectionId, @RequestBody @Valid PostRequestSectionHoldDrink requestBody) {
     log.info("Hold a drink in a section");
 

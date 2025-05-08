@@ -13,9 +13,12 @@ import magis5.magis5challenge.enumeration.EDrinkType;
 @Getter
 @Setter
 @Builder
-public class SectionDrinkResponse {
-  private UUID id;
-  private BigDecimal stock;
+public class SectionWithDrinksResponse {
+  @JsonProperty("section_id")
+  private UUID sectionId;
+
+  @JsonProperty("total_stock")
+  private BigDecimal totalStock;
 
   @JsonProperty("drink_type")
   private EDrinkType drinkType;
@@ -26,5 +29,5 @@ public class SectionDrinkResponse {
   @JsonProperty("updated_at")
   private LocalDateTime updatedAt;
 
-  private List<DrinkGetResponse> drinks;
+  private List<DrinkSectionResponse> drinks;
 }

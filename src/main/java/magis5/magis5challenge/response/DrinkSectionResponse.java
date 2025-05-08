@@ -1,9 +1,7 @@
 package magis5.magis5challenge.response;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,12 +12,17 @@ import magis5.magis5challenge.enumeration.EDrinkType;
 @Setter
 @Builder
 public class DrinkSectionResponse {
-  private UUID id;
+  @JsonProperty("drink_id")
+  private UUID drinkId;
+
   private String name;
-  private BigDecimal volume;
+
+  @JsonProperty("drink_volume")
+  private BigDecimal drinkVolume;
+
+  @JsonProperty("total_drink_volume")
+  private BigDecimal totalDrinkVolume;
 
   @JsonProperty("drink_type")
   private EDrinkType drinkType;
-
-  @JsonManagedReference private List<SectionGetResponse> sections;
 }

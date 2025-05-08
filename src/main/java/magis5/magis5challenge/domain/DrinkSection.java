@@ -2,23 +2,21 @@ package magis5.magis5challenge.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.With;
-import magis5.magis5challenge.enumeration.EDrinkType;
-import org.hibernate.annotations.CreationTimestamp;
 
 @With
 @Getter
@@ -27,27 +25,19 @@ import org.hibernate.annotations.CreationTimestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Drink {
+@EqualsAndHashCode(exclude = {"section", "drink"})
+public class DrinkSection {
   @Id
   @Setter(AccessLevel.NONE)
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @Column(nullable = false)
-  private String name;
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  private Section section;
+
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  private Drink drink;
 
   @Column(nullable = false)
   private BigDecimal volume;
-
-  @Column(nullable = false)
-  @Enumerated(value = EnumType.STRING)
-  private EDrinkType type;
-
-  @CreationTimestamp private LocalDateTime createdAt;
-
-  private LocalDateTime updatedAt;
-
-  public BigDecimal getVolumeToBeStored(final BigDecimal qty) {
-    return volume.multiply(qty);
-  }
 }

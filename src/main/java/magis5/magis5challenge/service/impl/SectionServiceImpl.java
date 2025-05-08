@@ -16,11 +16,12 @@ import magis5.magis5challenge.exception.NotFoundException;
 import magis5.magis5challenge.exception.WithDrawException;
 import magis5.magis5challenge.mapper.DrinkSectionMapper;
 import magis5.magis5challenge.mapper.SectionMapper;
+import magis5.magis5challenge.repository.DrinkSectionRepository;
 import magis5.magis5challenge.repository.SectionRepository;
 import magis5.magis5challenge.request.PostRequestSectionHoldDrink;
-import magis5.magis5challenge.response.SectionDrinkResponse;
 import magis5.magis5challenge.response.SectionGetResponse;
 import magis5.magis5challenge.response.SectionPostResponse;
+import magis5.magis5challenge.response.SectionWithDrinksResponse;
 import magis5.magis5challenge.service.DrinkService;
 import magis5.magis5challenge.service.HistoryService;
 import magis5.magis5challenge.service.SectionService;
@@ -35,18 +36,24 @@ public class SectionServiceImpl implements SectionService {
   private final HistoryService historyService;
   private final SectionMapper sectionMapper;
   private final DrinkSectionMapper drinkSectionMapper;
+  private final DrinkSectionRepository drinkSectionRepository;
 
   public SectionGetResponse findById(String id) {
     Section section = getSection(id);
     return sectionMapper.toSectionGetResponse(section);
   }
 
-  public SectionDrinkResponse findByIdWithDrinks(final String id) {
+  public SectionWithDrinksResponse findByIdWithDrinks(final String id) {
     Section section =
         sectionRepository
-            .findByIdWithDrinks(UUID.fromString(id))
-            .orElseThrow(() -> new NotFoundException("Section not found"));
-    return drinkSectionMapper.toSectionDrinkResponse(section, section.getDrinks());
+            .findWithStocksAndDrinksById(UUID.fromString(id))
+            .orElseThrow(() -> new NotFoundException(id));
+
+    SectionWithDrinksResponse sectionWithDrinksResponse =
+        sectionMapper.toSectionDrinkResponse(section);
+    sectionWithDrinksResponse.setDrinks(
+        drinkSectionMapper.toDrinkSectionResponse(section.getDrinkSections()));
+    return sectionWithDrinksResponse;
   }
 
   public List<SectionGetResponse> findAll() {
@@ -62,7 +69,7 @@ public class SectionServiceImpl implements SectionService {
   }
 
   @Transactional
-  public SectionDrinkResponse manageSection(
+  public SectionWithDrinksResponse manageSection(
       final String sectionId, final PostRequestSectionHoldDrink requestBody) {
     Section section = getSection(sectionId);
     Drink drink = drinkService.findEntityById(requestBody.getDrinkId());
@@ -79,7 +86,7 @@ public class SectionServiceImpl implements SectionService {
     }
 
     if (ETransaction.IN.equals(transaction)) {
-      storeADrink(section, drinkVolume, drink);
+      storeADrink(section, drink, drinkVolume);
     } else {
       withDrawADrink(section, drinkVolume, drink);
     }
@@ -92,15 +99,8 @@ public class SectionServiceImpl implements SectionService {
     return drinkSectionMapper.toSectionDrinkResponse(saved, saved.getDrinks());
   }
 
-  private void storeADrink(Section section, BigDecimal drinkVolume, Drink drink) {
-    if (!section.getDrinks().contains(drink)) {
-      section.getDrinks().add(drink);
-    }
-
-    if (!drink.getSections().contains(section)) {
-      drink.getSections().add(section);
-    }
-
+  private void storeADrink(Section section, Drink drink, BigDecimal drinkVolume) {
+    section.addStock(drink, drinkVolume);
     section.setDrinkType(drink.getType());
     section.setStock(section.getStock().add(drinkVolume));
   }
@@ -122,6 +122,6 @@ public class SectionServiceImpl implements SectionService {
 
   private boolean exceedsCapacity(final Section section, final BigDecimal drinkVolume) {
     BigDecimal max = section.getDrinkType().getMaxVolume();
-    return drinkVolume.compareTo(max) > 0 || drinkVolume.compareTo(section.getStock()) > 0;
+    return drinkVolume.compareTo(max) > 0;
   }
 }
