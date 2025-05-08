@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import magis5.magis5challenge.domain.Drink;
+import magis5.magis5challenge.domain.DrinkSection;
 import magis5.magis5challenge.domain.Section;
 import magis5.magis5challenge.enumeration.EDrinkType;
 import magis5.magis5challenge.enumeration.ETransaction;
@@ -71,7 +72,10 @@ public class SectionServiceImpl implements SectionService {
   @Transactional
   public SectionWithDrinksResponse manageSection(
       final String sectionId, final PostRequestSectionHoldDrink requestBody) {
-    Section section = getSection(sectionId);
+    Section section =
+        sectionRepository
+            .findWithStocksAndDrinksById(UUID.fromString(sectionId))
+            .orElseThrow(() -> new NotFoundException(sectionId));
     Drink drink = drinkService.findEntityById(requestBody.getDrinkId());
     ETransaction transaction = ETransaction.valueOf(requestBody.getTransactionType());
 
@@ -88,15 +92,18 @@ public class SectionServiceImpl implements SectionService {
     if (ETransaction.IN.equals(transaction)) {
       storeADrink(section, drink, drinkVolume);
     } else {
-      withDrawADrink(section, drinkVolume, drink);
+      withDrawADrink(section, drinkVolume, drink, requestBody.getQty());
     }
 
     section.setUpdatedAt(LocalDateTime.now());
     Section saved = sectionRepository.save(section);
 
     historyService.save(saved, drink, transaction, drinkVolume);
-
-    return drinkSectionMapper.toSectionDrinkResponse(saved, saved.getDrinks());
+    SectionWithDrinksResponse sectionWithDrinksResponse =
+        sectionMapper.toSectionDrinkResponse(section);
+    sectionWithDrinksResponse.setDrinks(
+        drinkSectionMapper.toDrinkSectionResponse(section.getDrinkSections()));
+    return sectionWithDrinksResponse;
   }
 
   private void storeADrink(Section section, Drink drink, BigDecimal drinkVolume) {
@@ -105,13 +112,28 @@ public class SectionServiceImpl implements SectionService {
     section.setStock(section.getStock().add(drinkVolume));
   }
 
-  private void withDrawADrink(Section section, BigDecimal drinkVolume, Drink drink) {
+  private void withDrawADrink(
+      Section section, BigDecimal drinkVolume, Drink drink, BigDecimal qty) {
     if (!section.getDrinks().contains(drink)) {
       throw new WithDrawException("Drink not found in this section");
     }
+    DrinkSection drinkSection =
+        section.getDrinkSections().stream()
+            .filter(ds -> ds.getDrink().equals(drink))
+            .findFirst()
+            .get();
 
-    section.setDrinkType(drink.getType());
-    section.setStock(section.getStock().subtract(drinkVolume));
+    if (drinkVolume.compareTo(drinkSection.getDrink().getVolume()) >= 1) {
+      section.getDrinkSections().remove(drinkSection);
+      section.setStock(section.getStock().subtract(drinkSection.getVolume()));
+    } else {
+      section.setStock(
+          section.getStock().subtract(drinkSection.getDrink().getVolume().multiply(qty)));
+      drinkSection.setVolume(qty);
+    }
+
+    drinkSectionRepository.save(drinkSection);
+    sectionRepository.save(section);
   }
 
   private Section getSection(String sectionId) {

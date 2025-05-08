@@ -31,7 +31,7 @@ public class SectionController {
 
   @GetMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<SectionGetResponse> findById(@PathVariable String id) {
-    log.info("Find a sections - {}", id);
+    log.info("Find a section - {}", id);
 
     SectionGetResponse section = sectionService.findById(id);
 
@@ -71,7 +71,7 @@ public class SectionController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<SectionWithDrinksResponse> manageSection(
       @PathVariable String sectionId, @RequestBody @Valid PostRequestSectionHoldDrink requestBody) {
-    log.info("Hold a drink in a section");
+    log.info("Store a drink in a section");
 
     var section = sectionService.manageSection(sectionId, requestBody);
 
