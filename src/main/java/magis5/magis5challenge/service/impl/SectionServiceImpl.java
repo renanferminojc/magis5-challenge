@@ -113,7 +113,9 @@ public class SectionServiceImpl implements SectionService {
   }
 
   private void storeADrink(Section section, Drink drink, BigDecimal drinkVolume) {
-    section.addStock(drink, drinkVolume);
+    DrinkSection drinkSection = findOrCreateDrinkSection(section, drink);
+    drinkSection.setVolume(drinkSection.getVolume().add(drinkVolume));
+    section.setStock(section.getStock().add(drinkVolume));
     section.setDrinkType(drink.getType());
     section.setStock(section.getStock().add(drinkVolume));
   }
@@ -165,5 +167,19 @@ public class SectionServiceImpl implements SectionService {
   private void saveUpdatedData(final Section section, final DrinkSection drinkSection) {
     drinkSectionRepository.save(drinkSection);
     sectionRepository.save(section);
+  }
+
+  private DrinkSection findOrCreateDrinkSection(Section section, Drink drink) {
+    return section.getDrinkSections().stream()
+        .filter(ds -> ds.getDrink().equals(drink))
+        .findFirst()
+        .orElseGet(() -> createNewDrinkSection(section, drink));
+  }
+
+  private DrinkSection createNewDrinkSection(Section section, Drink drink) {
+    DrinkSection drinkSection =
+        DrinkSection.builder().drink(drink).section(section).volume(BigDecimal.ZERO).build();
+    section.getDrinkSections().add(drinkSection);
+    return drinkSection;
   }
 }

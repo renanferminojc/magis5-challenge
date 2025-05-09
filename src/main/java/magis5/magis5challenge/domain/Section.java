@@ -59,21 +59,6 @@ public class Section {
     return drinkSections.stream().map(DrinkSection::getDrink).toList();
   }
 
-  public void addStock(Drink drink, BigDecimal qty) {
-    DrinkSection ds =
-        drinkSections.stream()
-            .filter(s -> s.getDrink().equals(drink))
-            .findFirst()
-            .orElseGet(
-                () -> {
-                  DrinkSection drinkSection =
-                      DrinkSection.builder().drink(drink).section(this).build();
-                  drinkSections.add(drinkSection);
-                  return drinkSection;
-                });
-    ds.setVolume(ds.getVolume() == null ? qty : ds.getVolume().add(qty));
-  }
-
   public boolean sectionTypeIsNotEqualDrinkType(EDrinkType drinkType) {
     return !this.drinkType.equals(drinkType);
   }
