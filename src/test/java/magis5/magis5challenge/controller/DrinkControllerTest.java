@@ -56,6 +56,7 @@ class DrinkControllerTest {
   @Autowired private MockMvc mockMvc;
 
   @Autowired private FileUtils fileUtils;
+
   @Autowired private DrinkSectionUtils drinkSectionUtils;
 
   @MockitoBean private DrinkRepository drinkRepository;

@@ -75,6 +75,6 @@ public class Section {
   }
 
   public boolean sectionTypeIsNotEqualDrinkType(EDrinkType drinkType) {
-    return this.drinkType.equals(drinkType);
+    return !this.drinkType.equals(drinkType);
   }
 }

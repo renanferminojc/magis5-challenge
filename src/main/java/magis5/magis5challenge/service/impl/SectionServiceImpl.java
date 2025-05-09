@@ -15,7 +15,6 @@ import magis5.magis5challenge.exception.CapacityExceededException;
 import magis5.magis5challenge.exception.DrinkTypeException;
 import magis5.magis5challenge.exception.NotFoundException;
 import magis5.magis5challenge.exception.WithDrawException;
-import magis5.magis5challenge.mapper.DrinkSectionMapper;
 import magis5.magis5challenge.mapper.SectionMapper;
 import magis5.magis5challenge.repository.DrinkSectionRepository;
 import magis5.magis5challenge.repository.SectionRepository;
@@ -39,7 +38,6 @@ public class SectionServiceImpl implements SectionService {
   private final HistoryService historyService;
 
   private final SectionMapper sectionMapper;
-  private final DrinkSectionMapper drinkSectionMapper;
 
   public SectionGetResponse findById(final String sectionId) {
     Section section =
@@ -80,15 +78,9 @@ public class SectionServiceImpl implements SectionService {
     Drink drink = drinkService.findEntityById(requestBody.getDrinkId());
     ETransaction transaction = ETransaction.valueOf(requestBody.getTransactionType());
 
-    if (section.sectionTypeIsNotEqualDrinkType(drink.getType())) {
-      throw new DrinkTypeException(
-          "Section drink type mismatch, section type: %s".formatted(section.getDrinkType()));
-    }
-
-    BigDecimal drinkVolume = drink.getVolume().multiply(requestBody.getQty());
-    if (exceedsCapacity(section, drinkVolume)) {
-      throw new CapacityExceededException("Capacity exceeded");
-    }
+    validateDrinkType(section, drink);
+    BigDecimal drinkVolume = calculateDrinkVolume(drink, requestBody.getQty());
+    validateCapacity(section, drinkVolume);
 
     if (ETransaction.IN.equals(transaction)) {
       storeADrink(section, drink, drinkVolume);
@@ -100,11 +92,24 @@ public class SectionServiceImpl implements SectionService {
     Section saved = sectionRepository.save(section);
 
     historyService.save(saved, drink, transaction, drinkVolume);
-    SectionWithDrinksResponse sectionWithDrinksResponse =
-        sectionMapper.toSectionDrinkResponse(section);
-    sectionWithDrinksResponse.setDrinks(
-        drinkSectionMapper.toDrinkSectionResponse(section.getDrinkSections()));
-    return sectionWithDrinksResponse;
+    return sectionMapper.toSectionDrinkResponse(section);
+  }
+
+  private void validateCapacity(Section section, BigDecimal drinkVolume) {
+    if (exceedsCapacity(section, drinkVolume)) {
+      throw new CapacityExceededException("Capacity exceeded");
+    }
+  }
+
+  private BigDecimal calculateDrinkVolume(Drink drink, BigDecimal qty) {
+    return drink.getVolume().multiply(qty);
+  }
+
+  private static void validateDrinkType(Section section, Drink drink) {
+    if (section.sectionTypeIsNotEqualDrinkType(drink.getType())) {
+      throw new DrinkTypeException(
+          "Section drink type mismatch, section type: %s".formatted(section.getDrinkType()));
+    }
   }
 
   private void storeADrink(Section section, Drink drink, BigDecimal drinkVolume) {
