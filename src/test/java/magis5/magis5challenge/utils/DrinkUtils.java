@@ -30,28 +30,4 @@ public class DrinkUtils {
 
     return new ArrayList<>(List.of(cocaCola, pepsiBlack));
   }
-
-  //    public Drink drinkWithSections() {
-  //      Section section =
-  //          Section.builder()
-  //              .id(UUID.fromString("b4e14200-1d1a-426d-adcf-408c147c6d49"))
-  //              .stock(BigDecimal.TEN)
-  //              .drinkType(EDrinkType.NON_ALCOHOLIC)
-  //              .createdAt(DateUtils.getDate())
-  //              .build();
-  //      Drink cocaCola = newDrinkList().getFirst();
-  //      cocaCola.setSections(List.of(section));
-  //      cocaCola.setType(EDrinkType.NON_ALCOHOLIC);
-  //      return cocaCola;
-  //    }
-
-  private static Drink createDrink(final String name, final String volume, EDrinkType type) {
-    return Drink.builder()
-        .id(UUID.fromString("b4e14200-1d1a-426d-adcf-408c147c6d49"))
-        .name("Coca Cola")
-        .volume(new BigDecimal("2.0"))
-        .type(EDrinkType.NON_ALCOHOLIC)
-        .createdAt(DateUtils.getDate())
-        .build();
-  }
 }

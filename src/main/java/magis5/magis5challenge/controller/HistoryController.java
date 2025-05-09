@@ -20,6 +20,15 @@ public class HistoryController {
 
   private final HistoryService historyService;
 
+  @GetMapping(path = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<HistoryGetResponse> findById(@PathVariable String id) {
+    log.info("Find a history by id- {}", id);
+
+    HistoryGetResponse history = historyService.findById(id);
+
+    return ResponseEntity.ok(history);
+  }
+
   @GetMapping(path = "drink/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<List<HistoryGetResponse>> findByDrinkId(@PathVariable String id) {
     log.info("Find a history based on drink id- {}", id);

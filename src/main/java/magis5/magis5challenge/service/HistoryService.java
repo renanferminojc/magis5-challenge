@@ -15,4 +15,6 @@ public interface HistoryService {
   List<HistoryGetResponse> findAll();
 
   void save(Section section, Drink drink, ETransaction transactionType, BigDecimal volume);
+
+  HistoryGetResponse findById(final String id);
 }

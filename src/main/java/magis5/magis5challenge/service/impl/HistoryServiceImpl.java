@@ -8,6 +8,7 @@ import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.domain.History;
 import magis5.magis5challenge.domain.Section;
 import magis5.magis5challenge.enumeration.ETransaction;
+import magis5.magis5challenge.exception.NotFoundException;
 import magis5.magis5challenge.mapper.HistoryMapper;
 import magis5.magis5challenge.repository.HistoryRepository;
 import magis5.magis5challenge.response.HistoryGetResponse;
@@ -20,6 +21,14 @@ public class HistoryServiceImpl implements HistoryService {
 
   private final HistoryRepository historyRepository;
   private final HistoryMapper historyMapper;
+
+  public HistoryGetResponse findById(String id) {
+    History history =
+        historyRepository
+            .findById(UUID.fromString(id))
+            .orElseThrow(() -> new NotFoundException("History not found"));
+    return historyMapper.toHistoryGetResponse(history);
+  }
 
   public List<HistoryGetResponse> findByDrinkId(String id) {
     List<History> history = historyRepository.findByDrinkId(UUID.fromString(id));

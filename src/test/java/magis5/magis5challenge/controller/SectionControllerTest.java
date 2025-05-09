@@ -62,6 +62,8 @@ class SectionControllerTest {
 
   @Autowired private FileUtils fileUtils;
 
+  @Autowired private SectionMapper sectionMapper;
+
   @MockitoBean private SectionRepository sectionRepository;
 
   @MockitoBean private DrinkRepository drinkRepository;
@@ -69,7 +71,6 @@ class SectionControllerTest {
   @MockitoBean private DrinkSectionRepository drinkSectionRepository;
 
   @MockitoBean private HistoryRepository historyRepository;
-  @Autowired private SectionMapper sectionMapper;
 
   @BeforeEach
   void init() {
