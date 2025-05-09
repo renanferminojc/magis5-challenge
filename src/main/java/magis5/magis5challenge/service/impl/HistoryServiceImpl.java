@@ -8,7 +8,9 @@ import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.domain.History;
 import magis5.magis5challenge.domain.Section;
 import magis5.magis5challenge.enumeration.ETransaction;
+import magis5.magis5challenge.mapper.HistoryMapper;
 import magis5.magis5challenge.repository.HistoryRepository;
+import magis5.magis5challenge.response.HistoryGetResponse;
 import magis5.magis5challenge.service.HistoryService;
 import org.springframework.stereotype.Service;
 
@@ -17,17 +19,21 @@ import org.springframework.stereotype.Service;
 public class HistoryServiceImpl implements HistoryService {
 
   private final HistoryRepository historyRepository;
+  private final HistoryMapper historyMapper;
 
-  public List<History> findByDrinkId(String id) {
-    return historyRepository.findByDrinkId(UUID.fromString(id));
+  public List<HistoryGetResponse> findByDrinkId(String id) {
+    List<History> history = historyRepository.findByDrinkId(UUID.fromString(id));
+    return history.stream().map(historyMapper::toHistoryGetResponse).toList();
   }
 
-  public List<History> findBySectionId(String id) {
-    return historyRepository.findBySectionId(UUID.fromString(id));
+  public List<HistoryGetResponse> findBySectionId(String id) {
+    List<History> history = historyRepository.findBySectionId(UUID.fromString(id));
+    return history.stream().map(historyMapper::toHistoryGetResponse).toList();
   }
 
-  public List<History> findAll() {
-    return historyRepository.findAll();
+  public List<HistoryGetResponse> findAll() {
+    List<History> histories = historyRepository.findAll();
+    return histories.stream().map(historyMapper::toHistoryGetResponse).toList();
   }
 
   public void save(Section section, Drink drink, ETransaction transactionType, BigDecimal volume) {
