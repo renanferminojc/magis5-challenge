@@ -80,12 +80,12 @@ public class SectionServiceImpl implements SectionService {
     Drink drink = drinkService.findEntityById(requestBody.getDrinkId());
     ETransaction transaction = ETransaction.valueOf(requestBody.getTransactionType());
 
-    if (section.getDrinkType() != drink.getType()) {
+    if (section.sectionTypeIsNotEqualDrinkType(drink.getType())) {
       throw new DrinkTypeException(
           "Section drink type mismatch, section type: %s".formatted(section.getDrinkType()));
     }
 
-    BigDecimal drinkVolume = drink.getVolumeToBeStored(requestBody.getQty());
+    BigDecimal drinkVolume = drink.getVolume().multiply(requestBody.getQty());
     if (exceedsCapacity(section, drinkVolume)) {
       throw new CapacityExceededException("Capacity exceeded");
     }
@@ -93,7 +93,7 @@ public class SectionServiceImpl implements SectionService {
     if (ETransaction.IN.equals(transaction)) {
       storeADrink(section, drink, drinkVolume);
     } else {
-      withDrawADrink(section, drinkVolume, drink, requestBody.getQty());
+      withDrawADrink(section, drink, requestBody.getQty());
     }
 
     section.setUpdatedAt(LocalDateTime.now());
@@ -113,32 +113,52 @@ public class SectionServiceImpl implements SectionService {
     section.setStock(section.getStock().add(drinkVolume));
   }
 
-  private void withDrawADrink(
-      Section section, BigDecimal drinkVolume, Drink drink, BigDecimal qty) {
+  private void withDrawADrink(Section section, Drink drink, BigDecimal qty) {
     if (!section.getDrinks().contains(drink)) {
       throw new WithDrawException("Drink not found in this section");
     }
-    DrinkSection drinkSection =
-        section.getDrinkSections().stream()
-            .filter(ds -> ds.getDrink().equals(drink))
-            .findFirst()
-            .get();
+    DrinkSection drinkSection = getDrinkSectionByDrink(section, drink);
 
-    if (drinkVolume.compareTo(drinkSection.getDrink().getVolume()) >= 1) {
-      section.getDrinkSections().remove(drinkSection);
-      section.setStock(section.getStock().subtract(drinkSection.getVolume()));
+    var drinkVolumeToWithdraw = drink.getVolume().multiply(qty);
+
+    if (isWithdrawAllDrink(drinkVolumeToWithdraw, drinkSection.getDrink())) {
+      removeAllDrinkFromSection(section, drinkSection);
     } else {
-      section.setStock(
-          section.getStock().subtract(drinkSection.getDrink().getVolume().multiply(qty)));
-      drinkSection.setVolume(qty);
+      partialWithdrawDrinkFromSection(section, drinkSection, qty);
     }
+    saveUpdatedData(section, drinkSection);
+  }
 
-    drinkSectionRepository.save(drinkSection);
-    sectionRepository.save(section);
+  private static DrinkSection getDrinkSectionByDrink(Section section, Drink drink) {
+    return section.getDrinkSections().stream()
+        .filter(ds -> ds.getDrink().equals(drink))
+        .findFirst()
+        .get();
   }
 
   private boolean exceedsCapacity(final Section section, final BigDecimal drinkVolume) {
     BigDecimal max = section.getDrinkType().getMaxVolume();
     return drinkVolume.compareTo(max) > 0;
+  }
+
+  private boolean isWithdrawAllDrink(BigDecimal drinkVolumeToWithdraw, Drink drink) {
+    return drinkVolumeToWithdraw.compareTo(drink.getVolume()) >= 0;
+  }
+
+  private void removeAllDrinkFromSection(Section section, DrinkSection drinkSection) {
+    section.getDrinkSections().remove(drinkSection);
+    section.setStock(section.getStock().subtract(drinkSection.getVolume()));
+  }
+
+  private void partialWithdrawDrinkFromSection(
+      Section section, DrinkSection drinkSection, BigDecimal qty) {
+    BigDecimal withdrawnVolume = drinkSection.getDrink().getVolume().multiply(qty);
+    section.setStock(section.getStock().subtract(withdrawnVolume));
+    drinkSection.setVolume(qty);
+  }
+
+  private void saveUpdatedData(final Section section, final DrinkSection drinkSection) {
+    drinkSectionRepository.save(drinkSection);
+    sectionRepository.save(section);
   }
 }

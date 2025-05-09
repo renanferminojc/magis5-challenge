@@ -46,8 +46,4 @@ public class Drink {
   @CreationTimestamp private LocalDateTime createdAt;
 
   private LocalDateTime updatedAt;
-
-  public BigDecimal getVolumeToBeStored(final BigDecimal qty) {
-    return volume.multiply(qty);
-  }
 }

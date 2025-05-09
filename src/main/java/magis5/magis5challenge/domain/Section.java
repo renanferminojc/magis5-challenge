@@ -73,4 +73,8 @@ public class Section {
                 });
     ds.setVolume(ds.getVolume() == null ? qty : ds.getVolume().add(qty));
   }
+
+  public boolean sectionTypeIsNotEqualDrinkType(EDrinkType drinkType) {
+    return this.drinkType.equals(drinkType);
+  }
 }

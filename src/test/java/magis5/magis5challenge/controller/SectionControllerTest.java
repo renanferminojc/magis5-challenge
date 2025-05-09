@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import magis5.magis5challenge.domain.Section;
 import magis5.magis5challenge.mapper.DrinkMapperImpl;
 import magis5.magis5challenge.mapper.DrinkSectionMapperImpl;
+import magis5.magis5challenge.mapper.HistoryMapperImpl;
 import magis5.magis5challenge.mapper.SectionMapper;
 import magis5.magis5challenge.mapper.SectionMapperImpl;
 import magis5.magis5challenge.repository.DrinkRepository;
@@ -48,6 +49,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
   DrinkSectionMapperImpl.class,
   DrinkServiceImpl.class,
   DrinkMapperImpl.class,
+  HistoryMapperImpl.class,
   HistoryServiceImpl.class,
   SectionUtils.class,
   FileUtils.class
