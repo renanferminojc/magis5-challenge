@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import magis5.magis5challenge.commons.DateUtils;
 import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.domain.DrinkSection;
 import magis5.magis5challenge.domain.Section;
@@ -106,6 +107,12 @@ public class SectionServiceImpl implements SectionService {
   }
 
   private static void validateDrinkType(Section section, Drink drink) {
+    if (DateUtils.hasBeen24HoursSinceUpdate(section.getUpdatedAt())
+        && section.getDrinkType() == EDrinkType.NON_ALCOHOLIC
+        && section.getDrinks().isEmpty()) {
+      return;
+    }
+
     if (section.sectionTypeIsNotEqualDrinkType(drink.getType())) {
       throw new DrinkTypeException(
           "Section drink type mismatch, section type: %s".formatted(section.getDrinkType()));
