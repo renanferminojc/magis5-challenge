@@ -5,12 +5,17 @@ import java.util.UUID;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import magis5.magis5challenge.domain.Drink;
+import magis5.magis5challenge.domain.DrinkSection;
 import magis5.magis5challenge.exception.NotFoundException;
 import magis5.magis5challenge.mapper.DrinkMapper;
+import magis5.magis5challenge.mapper.SectionMapper;
 import magis5.magis5challenge.repository.DrinkRepository;
+import magis5.magis5challenge.repository.DrinkSectionRepository;
 import magis5.magis5challenge.request.DrinkPostRequest;
 import magis5.magis5challenge.response.DrinkGetResponse;
 import magis5.magis5challenge.response.DrinkPostResponse;
+import magis5.magis5challenge.response.DrinkWithSectionsResponse;
+import magis5.magis5challenge.response.SectionGetResponse;
 import magis5.magis5challenge.service.DrinkService;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +25,24 @@ public class DrinkServiceImpl implements DrinkService {
 
   private final DrinkRepository drinkRepository;
   private final DrinkMapper drinkMapper;
+  private final SectionMapper sectionMapper;
+  private final DrinkSectionRepository drinkSectionRepository;
 
   public DrinkGetResponse findById(String id) {
     return findAndMap(UUID.fromString(id), drinkMapper::toDrinkGetResponse);
+  }
+
+  public DrinkWithSectionsResponse findDrinkWithSections(String drinkId) {
+    List<DrinkSection> byDrinkId = drinkSectionRepository.findByDrinkId(UUID.fromString(drinkId));
+    List<SectionGetResponse> list =
+        byDrinkId.stream()
+            .map(DrinkSection::getSection)
+            .map(sectionMapper::toSectionGetResponse)
+            .toList();
+    DrinkWithSectionsResponse drinkWithSectionsResponse =
+        drinkMapper.toDrinkWithSectionsResponse(byDrinkId.getFirst().getDrink());
+    drinkWithSectionsResponse.setSections(list);
+    return drinkWithSectionsResponse;
   }
 
   public Drink findEntityById(String id) {

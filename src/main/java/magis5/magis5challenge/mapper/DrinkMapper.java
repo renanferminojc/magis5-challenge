@@ -5,6 +5,7 @@ import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.request.DrinkPostRequest;
 import magis5.magis5challenge.response.DrinkGetResponse;
 import magis5.magis5challenge.response.DrinkPostResponse;
+import magis5.magis5challenge.response.DrinkWithSectionsResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -20,6 +21,10 @@ public interface DrinkMapper {
 
   @Mapping(target = "drinkType", source = "type")
   DrinkGetResponse toDrinkGetResponse(Drink drinks);
+
+  @Mapping(target = "drinkId", source = "id")
+  @Mapping(target = "name", source = "name")
+  DrinkWithSectionsResponse toDrinkWithSectionsResponse(Drink drink);
 
   List<DrinkGetResponse> toDrinkGetResponse(List<Drink> drinks);
 }

@@ -33,13 +33,15 @@ import org.springframework.stereotype.Service;
 public class SectionServiceImpl implements SectionService {
 
   private final SectionRepository sectionRepository;
-  private final DrinkService drinkService;
-  private final HistoryService historyService;
-  private final SectionMapper sectionMapper;
-  private final DrinkSectionMapper drinkSectionMapper;
   private final DrinkSectionRepository drinkSectionRepository;
 
-  public SectionGetResponse findById(String id) {
+  private final DrinkService drinkService;
+  private final HistoryService historyService;
+
+  private final SectionMapper sectionMapper;
+  private final DrinkSectionMapper drinkSectionMapper;
+
+  public SectionGetResponse findById(final String id) {
     Section section = getSection(id);
     return sectionMapper.toSectionGetResponse(section);
   }

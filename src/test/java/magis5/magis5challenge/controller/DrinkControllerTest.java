@@ -11,7 +11,9 @@ import magis5.magis5challenge.mapper.DrinkMapperImpl;
 import magis5.magis5challenge.mapper.DrinkSectionMapperImpl;
 import magis5.magis5challenge.mapper.SectionMapperImpl;
 import magis5.magis5challenge.repository.DrinkRepository;
+import magis5.magis5challenge.repository.DrinkSectionRepository;
 import magis5.magis5challenge.service.impl.DrinkServiceImpl;
+import magis5.magis5challenge.utils.DrinkSectionUtils;
 import magis5.magis5challenge.utils.DrinkUtils;
 import magis5.magis5challenge.utils.FileUtils;
 import org.assertj.core.api.Assertions;
@@ -42,7 +44,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
   DrinkSectionMapperImpl.class,
   SectionMapperImpl.class,
   DrinkUtils.class,
-  FileUtils.class
+  FileUtils.class,
+  DrinkSectionUtils.class
 })
 class DrinkControllerTest {
   private static final String URL = "/drink";
@@ -53,8 +56,11 @@ class DrinkControllerTest {
   @Autowired private MockMvc mockMvc;
 
   @Autowired private FileUtils fileUtils;
+  @Autowired private DrinkSectionUtils drinkSectionUtils;
 
   @MockitoBean private DrinkRepository drinkRepository;
+
+  @MockitoBean private DrinkSectionRepository drinkSectionRepository;
 
   @BeforeEach
   void init() {
@@ -85,8 +91,8 @@ class DrinkControllerTest {
   void itShouldBeAbleToReturnASectionWithDrinks() throws Exception {
     var response =
         fileUtils.readResourceFile("drink/get-response-drink-by-id-with-sections-200.json");
-    BDDMockito.when(drinkRepository.findWithStocksAndSectionsById(ArgumentMatchers.any()))
-        .thenReturn(Optional.ofNullable(drinkUtils.drinkWithSections()));
+    BDDMockito.when(drinkSectionRepository.findByDrinkId(ArgumentMatchers.any()))
+        .thenReturn(List.of(drinkSectionUtils.createDrinkSection()));
 
     mockMvc
         .perform(MockMvcRequestBuilders.get(URL + "/{id}/sections", drinks.getFirst().getId()))

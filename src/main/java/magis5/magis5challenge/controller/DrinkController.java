@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import magis5.magis5challenge.request.DrinkPostRequest;
 import magis5.magis5challenge.response.DrinkGetResponse;
 import magis5.magis5challenge.response.DrinkPostResponse;
+import magis5.magis5challenge.response.DrinkWithSectionsResponse;
 import magis5.magis5challenge.service.DrinkService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,15 @@ public class DrinkController {
     DrinkGetResponse drink = drinkService.findById(id);
 
     return ResponseEntity.ok(drink);
+  }
+
+  @GetMapping(path = "{drinkId}/sections", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<DrinkWithSectionsResponse> drinkWithSections(@PathVariable String drinkId) {
+    log.info("Find a drink by id with sections - {}", drinkId);
+
+    DrinkWithSectionsResponse drinkWithSections = drinkService.findDrinkWithSections(drinkId);
+
+    return ResponseEntity.ok(drinkWithSections);
   }
 
   @GetMapping(path = "all", produces = MediaType.APPLICATION_JSON_VALUE)

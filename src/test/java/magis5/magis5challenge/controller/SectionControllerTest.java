@@ -9,10 +9,14 @@ import java.util.stream.Stream;
 import magis5.magis5challenge.domain.Section;
 import magis5.magis5challenge.mapper.DrinkMapperImpl;
 import magis5.magis5challenge.mapper.DrinkSectionMapperImpl;
+import magis5.magis5challenge.mapper.SectionMapper;
 import magis5.magis5challenge.mapper.SectionMapperImpl;
 import magis5.magis5challenge.repository.DrinkRepository;
+import magis5.magis5challenge.repository.DrinkSectionRepository;
 import magis5.magis5challenge.repository.HistoryRepository;
 import magis5.magis5challenge.repository.SectionRepository;
+import magis5.magis5challenge.service.impl.DrinkServiceImpl;
+import magis5.magis5challenge.service.impl.HistoryServiceImpl;
 import magis5.magis5challenge.service.impl.SectionServiceImpl;
 import magis5.magis5challenge.utils.FileUtils;
 import magis5.magis5challenge.utils.SectionUtils;
@@ -42,7 +46,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
   SectionServiceImpl.class,
   SectionMapperImpl.class,
   DrinkSectionMapperImpl.class,
+  DrinkServiceImpl.class,
   DrinkMapperImpl.class,
+  HistoryServiceImpl.class,
   SectionUtils.class,
   FileUtils.class
 })
@@ -60,7 +66,10 @@ class SectionControllerTest {
 
   @MockitoBean private DrinkRepository drinkRepository;
 
+  @MockitoBean private DrinkSectionRepository drinkSectionRepository;
+
   @MockitoBean private HistoryRepository historyRepository;
+  @Autowired private SectionMapper sectionMapper;
 
   @BeforeEach
   void init() {
