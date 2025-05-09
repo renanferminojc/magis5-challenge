@@ -41,22 +41,21 @@ public class SectionServiceImpl implements SectionService {
   private final SectionMapper sectionMapper;
   private final DrinkSectionMapper drinkSectionMapper;
 
-  public SectionGetResponse findById(final String id) {
-    Section section = getSection(id);
+  public SectionGetResponse findById(final String sectionId) {
+    Section section =
+        sectionRepository
+            .findById(UUID.fromString(sectionId))
+            .orElseThrow(() -> new NotFoundException("Section not found"));
     return sectionMapper.toSectionGetResponse(section);
   }
 
-  public SectionWithDrinksResponse findByIdWithDrinks(final String id) {
+  public SectionWithDrinksResponse findByIdWithDrinks(final String sectionId) {
     Section section =
         sectionRepository
-            .findWithStocksAndDrinksById(UUID.fromString(id))
-            .orElseThrow(() -> new NotFoundException(id));
+            .findWithStocksAndDrinksById(UUID.fromString(sectionId))
+            .orElseThrow(() -> new NotFoundException(sectionId));
 
-    SectionWithDrinksResponse sectionWithDrinksResponse =
-        sectionMapper.toSectionDrinkResponse(section);
-    sectionWithDrinksResponse.setDrinks(
-        drinkSectionMapper.toDrinkSectionResponse(section.getDrinkSections()));
-    return sectionWithDrinksResponse;
+    return sectionMapper.toSectionDrinkResponse(section);
   }
 
   public List<SectionGetResponse> findAll() {
@@ -136,12 +135,6 @@ public class SectionServiceImpl implements SectionService {
 
     drinkSectionRepository.save(drinkSection);
     sectionRepository.save(section);
-  }
-
-  private Section getSection(String sectionId) {
-    return sectionRepository
-        .findById(UUID.fromString(sectionId))
-        .orElseThrow(() -> new NotFoundException("Section not found"));
   }
 
   private boolean exceedsCapacity(final Section section, final BigDecimal drinkVolume) {

@@ -23,5 +23,6 @@ public interface SectionMapper {
 
   @Mapping(target = "sectionId", source = "id")
   @Mapping(target = "totalStock", source = "stock")
+  @Mapping(target = "drinks", source = "drinkSections")
   SectionWithDrinksResponse toSectionDrinkResponse(Section section);
 }
