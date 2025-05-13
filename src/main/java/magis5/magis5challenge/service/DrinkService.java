@@ -12,7 +12,8 @@ public interface DrinkService {
 
   Drink findEntityById(final String id);
 
-  List<DrinkGetResponse> findAll();
+  List<DrinkGetResponse> findAll(
+      final int page, final int size, final String sortBy, String sortDirection);
 
   DrinkPostResponse save(final DrinkPostRequest drink);
 
