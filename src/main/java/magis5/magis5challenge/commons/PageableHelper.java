@@ -8,23 +8,27 @@ import org.springframework.data.domain.Sort;
 @UtilityClass
 public class PageableHelper {
   public static Pageable createPageable(int page, int size, String sortBy, String sortDirection) {
-    if (!"ASC".equalsIgnoreCase(sortDirection) && !"DESC".equalsIgnoreCase(sortDirection)) {
-      sortDirection = "DESC";
-    }
+    sortDirection = getSortDirection(sortDirection);
 
-    Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+    Sort sort = getSort(sortDirection, sortBy);
     return PageRequest.of(page, size, sort);
   }
 
   public static Pageable createPageable(PageRequestParams requestParams) {
-    if (!"ASC".equalsIgnoreCase(requestParams.getSortDirection())
-        && !"DESC".equalsIgnoreCase(requestParams.getSortDirection())) {
-      requestParams.setSortDirection("DESC");
-    }
+    var sortDirection = getSortDirection(requestParams.getSortDirection());
 
-    Sort sort =
-        Sort.by(
-            Sort.Direction.fromString(requestParams.getSortDirection()), requestParams.getSortBy());
+    Sort sort = getSort(sortDirection, requestParams.getSortBy());
     return PageRequest.of(requestParams.getPage(), requestParams.getSize(), sort);
+  }
+
+  private static Sort getSort(String sortDirection, String requestParams) {
+    return Sort.by(Sort.Direction.fromString(sortDirection), requestParams);
+  }
+
+  private static String getSortDirection(String sortDirection) {
+    if (!"ASC".equalsIgnoreCase(sortDirection) && !"DESC".equalsIgnoreCase(sortDirection)) {
+      sortDirection = "DESC";
+    }
+    return sortDirection;
   }
 }
