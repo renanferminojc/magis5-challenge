@@ -15,4 +15,16 @@ public class PageableHelper {
     Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
     return PageRequest.of(page, size, sort);
   }
+
+  public static Pageable createPageable(PageRequestParams requestParams) {
+    if (!"ASC".equalsIgnoreCase(requestParams.getSortDirection())
+        && !"DESC".equalsIgnoreCase(requestParams.getSortDirection())) {
+      requestParams.setSortDirection("DESC");
+    }
+
+    Sort sort =
+        Sort.by(
+            Sort.Direction.fromString(requestParams.getSortDirection()), requestParams.getSortBy());
+    return PageRequest.of(requestParams.getPage(), requestParams.getSize(), sort);
+  }
 }

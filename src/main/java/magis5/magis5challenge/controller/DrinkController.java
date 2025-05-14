@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import magis5.magis5challenge.commons.PageRequestParams;
 import magis5.magis5challenge.request.DrinkPostRequest;
 import magis5.magis5challenge.response.DrinkGetResponse;
 import magis5.magis5challenge.response.DrinkPostResponse;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -48,14 +48,10 @@ public class DrinkController {
   }
 
   @GetMapping(path = "all", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<List<DrinkGetResponse>> findAll(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size,
-      @RequestParam(defaultValue = "name") String sortBy,
-      @RequestParam(defaultValue = "DESC") String sortDirection) {
+  public ResponseEntity<List<DrinkGetResponse>> findAll(PageRequestParams requestParams) {
     log.info("Find all drinks");
 
-    List<DrinkGetResponse> drinkList = drinkService.findAll(page, size, sortBy, sortDirection);
+    List<DrinkGetResponse> drinkList = drinkService.findAll(requestParams);
 
     return ResponseEntity.ok(drinkList);
   }

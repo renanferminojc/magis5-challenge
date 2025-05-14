@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
+import magis5.magis5challenge.commons.PageRequestParams;
 import magis5.magis5challenge.commons.PageableHelper;
 import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.domain.DrinkSection;
@@ -51,9 +52,8 @@ public class DrinkServiceImpl implements DrinkService {
     return findAndMap(UUID.fromString(id), Function.identity());
   }
 
-  public List<DrinkGetResponse> findAll(
-      final int page, final int size, final String sortBy, String sortDirection) {
-    Pageable pageable = PageableHelper.createPageable(page, size, sortBy, sortDirection);
+  public List<DrinkGetResponse> findAll(PageRequestParams requestParams) {
+    Pageable pageable = PageableHelper.createPageable(requestParams);
     List<Drink> drinkList = drinkRepository.findAll(pageable).getContent();
     return drinkMapper.toDrinkGetResponse(drinkList);
   }
