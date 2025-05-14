@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import magis5.magis5challenge.commons.PageableHelper;
 import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.domain.History;
 import magis5.magis5challenge.domain.Section;
@@ -13,6 +14,7 @@ import magis5.magis5challenge.mapper.HistoryMapper;
 import magis5.magis5challenge.repository.HistoryRepository;
 import magis5.magis5challenge.response.HistoryGetResponse;
 import magis5.magis5challenge.service.HistoryService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,8 +42,9 @@ public class HistoryServiceImpl implements HistoryService {
     return history.stream().map(historyMapper::toHistoryGetResponse).toList();
   }
 
-  public List<HistoryGetResponse> findAll() {
-    List<History> histories = historyRepository.findAll();
+  public List<HistoryGetResponse> findAll(int page, int size, String sortBy, String sortDirection) {
+    Pageable pageable = PageableHelper.createPageable(page, size, sortBy, sortDirection);
+    List<History> histories = historyRepository.findAll(pageable).getContent();
     return histories.stream().map(historyMapper::toHistoryGetResponse).toList();
   }
 

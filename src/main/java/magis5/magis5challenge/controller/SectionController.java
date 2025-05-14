@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -48,10 +49,15 @@ public class SectionController {
   }
 
   @GetMapping(path = "all", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<List<SectionGetResponse>> findAll() {
+  public ResponseEntity<List<SectionGetResponse>> findAll(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(defaultValue = "createdAt") String sortBy,
+      @RequestParam(defaultValue = "DESC") String sortDirection) {
     log.info("Find all sections");
 
-    List<SectionGetResponse> sectionList = sectionService.findAll();
+    List<SectionGetResponse> sectionList =
+        sectionService.findAll(page, size, sortBy, sortDirection);
 
     return ResponseEntity.ok(sectionList);
   }

@@ -9,7 +9,7 @@ import magis5.magis5challenge.response.SectionWithDrinksResponse;
 public interface SectionService {
   SectionGetResponse findById(final String id);
 
-  List<SectionGetResponse> findAll();
+  List<SectionGetResponse> findAll(int page, int size, String sortBy, String sortDirection);
 
   SectionPostResponse save();
 

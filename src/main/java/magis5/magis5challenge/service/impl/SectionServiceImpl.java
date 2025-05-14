@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import magis5.magis5challenge.commons.DateUtils;
+import magis5.magis5challenge.commons.PageableHelper;
 import magis5.magis5challenge.domain.Drink;
 import magis5.magis5challenge.domain.DrinkSection;
 import magis5.magis5challenge.domain.Section;
@@ -26,6 +27,7 @@ import magis5.magis5challenge.response.SectionWithDrinksResponse;
 import magis5.magis5challenge.service.DrinkService;
 import magis5.magis5challenge.service.HistoryService;
 import magis5.magis5challenge.service.SectionService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -57,8 +59,10 @@ public class SectionServiceImpl implements SectionService {
     return sectionMapper.toSectionDrinkResponse(section);
   }
 
-  public List<SectionGetResponse> findAll() {
-    List<Section> sectionList = sectionRepository.findAll();
+  public List<SectionGetResponse> findAll(int page, int size, String sortBy, String sortDirection) {
+    Pageable pageable = PageableHelper.createPageable(page, size, sortBy, sortDirection);
+
+    List<Section> sectionList = sectionRepository.findAll(pageable).getContent();
     return sectionMapper.toSectionGetResponse(sectionList);
   }
 

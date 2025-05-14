@@ -12,7 +12,7 @@ public interface HistoryService {
 
   List<HistoryGetResponse> findBySectionId(final String sectionId);
 
-  List<HistoryGetResponse> findAll();
+  List<HistoryGetResponse> findAll(int page, int size, String sortBy, String sortDirection);
 
   void save(Section section, Drink drink, ETransaction transactionType, BigDecimal volume);
 
