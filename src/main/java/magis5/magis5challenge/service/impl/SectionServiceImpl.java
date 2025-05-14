@@ -111,6 +111,10 @@ public class SectionServiceImpl implements SectionService {
   }
 
   private static void validateDrinkType(Section section, Drink drink) {
+    if (section.getUpdatedAt() == null) {
+      return;
+    }
+
     if (DateUtils.hasBeen24HoursSinceUpdate(section.getUpdatedAt())
         && section.getDrinkType() == EDrinkType.NON_ALCOHOLIC
         && section.getDrinks().isEmpty()) {
